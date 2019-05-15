@@ -507,8 +507,27 @@ class Server extends EventEmitter {
 
       // Skip sending update back for 'answer' announce messages – not needed
       if (!params.answer && !(params.event && params.event === 'trickle')) {
-        socket.send(JSON.stringify(response), socket.onSend)
-        debug('sent response %s to %s', JSON.stringify(response), params.peer_id)
+        this.getSwarm(params.info_hash, (err, swarm) => {
+            if (this.destroyed) return
+            if (err) return this.emit('warning', err)
+            if (!swarm) {
+              return this.emit('warning', new Error('no swarm with that `info_hash`'))
+            }
+
+            // For trickled announce, only send 1 update response per announce event.
+            if (params.annouce_id) {
+                const announceGroup = swarm.announceGroups.peek(params.announce_id)
+                // If announceGroup is truthy, a response has already been sent to
+                // this announce group.
+                if (!announceGroup) {
+                    socket.send(JSON.stringify(response), socket.onSend)
+                    debug('sent response %s to %s', JSON.stringify(response), params.peer_id)
+                }
+            } else { // Non trickled announce
+                socket.send(JSON.stringify(response), socket.onSend)
+                debug('sent response %s to %s', JSON.stringify(response), params.peer_id)
+            }
+        })
       }
 
       if (Array.isArray(params.offers)) {
@@ -521,18 +540,21 @@ class Server extends EventEmitter {
             if (!swarm) {
               return this.emit('warning', new Error('no swarm with that `info_hash`'))
             }
-            debug('swarm length', swarm.peers.length)
-            debug('offers length', swarm.offers.length)
+
+            // Handle trickled announce.
+            let announceGroup
+            if (params.announce_id) {
+                announceGroup = swarm.announceGroups.get(params.announce_id)
+                if (!announceGroup) {
+                    announceGroup = new Set()
+                    swarm.announceGroups.set(params.announce_id, announceGroup)
+                }
+            }
 
             peers.forEach((peer, i) => {
                 const { sdp } = params.offers[i].offer
                 const isTrickleSdp = /a=ice-options:trickle\s\n/g.test(sdp)
-                if (isTrickleSdp) {
-                    let announceGroup = swarm.announceGroups.get(params.announce_id)
-                    if (!announceGroup) {
-                        announceGroup = new Set()
-                        swarm.announceGroups.set(params.announce_id, announceGroup)
-                    }
+                if (isTrickleSdp && announceGroup) {
                     if (announceGroup.has(peer.peerId)) {
                         return
                     } else {
