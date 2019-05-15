@@ -513,7 +513,7 @@ class Server extends EventEmitter {
             }
 
             // For trickled announce, only send 1 update response per announce event.
-            if (params.annouce_id) {
+            if (params.announce_id) {
                 const announceGroup = swarm.announceGroups.peek(params.announce_id)
                 // If announceGroup is truthy, a response has already been sent to
                 // this announce group.
