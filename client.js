@@ -56,6 +56,7 @@ class Client extends EventEmitter {
     this._getAnnounceOpts = opts.getAnnounceOpts
     this._rtcConfig = opts.rtcConfig
     this._userAgent = opts.userAgent
+    this._trickle = opts.trickle !== undefined ? opts.trickle : false
 
     // Support lazy 'wrtc' module initialization
     // See: https://github.com/webtorrent/webtorrent-hybrid/issues/46
@@ -105,7 +106,7 @@ class Client extends EventEmitter {
             nextTickWarn(new Error(`Unsupported tracker protocol: ${announceUrl}`))
             return null
           }
-          return new WebSocketTracker(this, announceUrl)
+          return new WebSocketTracker(this, announceUrl, { trickle: this._trickle })
         } else {
           nextTickWarn(new Error(`Unsupported tracker protocol: ${announceUrl}`))
           return null

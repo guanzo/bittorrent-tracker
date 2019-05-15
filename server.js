@@ -486,7 +486,6 @@ class Server extends EventEmitter {
         this.emit('warning', err)
         return
       }
-
       response.action = params.action === common.ACTIONS.ANNOUNCE ? 'announce' : 'scrape'
 
       let peers
@@ -505,7 +504,7 @@ class Server extends EventEmitter {
       }
 
       // Skip sending update back for 'answer' announce messages – not needed
-      if (!params.answer) {
+      if (!params.answer && !(params.event && params.event === 'trickle')) {
         socket.send(JSON.stringify(response), socket.onSend)
         debug('sent response %s to %s', JSON.stringify(response), params.peer_id)
       }
@@ -513,16 +512,43 @@ class Server extends EventEmitter {
       if (Array.isArray(params.offers)) {
         debug('got %s offers from %s', params.offers.length, params.peer_id)
         debug('got %s peers from swarm %s', peers.length, params.info_hash)
-        peers.forEach((peer, i) => {
-          peer.socket.send(JSON.stringify({
-            action: 'announce',
-            offer: params.offers[i].offer,
-            offer_id: params.offers[i].offer_id,
-            peer_id: common.hexToBinary(params.peer_id),
-            info_hash: common.hexToBinary(params.info_hash)
-          }), peer.socket.onSend)
-          debug('sent offer to %s from %s', peer.peerId, params.peer_id)
-        })
+
+        this.getSwarm(params.info_hash, (err, swarm) => {
+            if (this.destroyed) return
+            if (err) return this.emit('warning', err)
+            if (!swarm) {
+              return this.emit('warning', new Error('no swarm with that `info_hash`'))
+            }
+            debug('swarm length', swarm.peers.length)
+            debug('offers length', swarm.offers.length)
+
+            peers.forEach((peer, i) => {
+                const { sdp } = params.offers[i].offer
+                const isTrickleSdp = /a=ice-options:trickle\s\n/g.test(sdp)
+                if (isTrickleSdp) {
+                    let announceGroup = swarm.announceGroups.get(params.announce_id)
+                    if (!announceGroup) {
+                        announceGroup = new Set()
+                        swarm.announceGroups.set(params.announce_id, announceGroup)
+                    }
+                    if (announceGroup.has(peer.peerId)) {
+                        return
+                    } else {
+                        announceGroup.add(peer.peerId)
+                        swarm.offers.set(params.offers[i].offer_id, peer.peerId)
+                    }
+                }
+
+                peer.socket.send(JSON.stringify({
+                    action: 'announce',
+                    offer: params.offers[i].offer,
+                    offer_id: params.offers[i].offer_id,
+                    peer_id: common.hexToBinary(params.peer_id),
+                    info_hash: common.hexToBinary(params.info_hash)
+                }), peer.socket.onSend)
+                debug('sent offer to %s from %s', peer.peerId, params.peer_id)
+            })
+          })
       }
 
       const done = () => {
@@ -533,6 +559,7 @@ class Server extends EventEmitter {
       }
 
       if (params.answer) {
+          //console.log('PARAMS.ANSWER PEERS', peers)
         debug('got answer %s from %s', JSON.stringify(params.answer), params.peer_id)
 
         this.getSwarm(params.info_hash, (err, swarm) => {
