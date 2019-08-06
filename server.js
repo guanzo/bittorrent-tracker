@@ -17,6 +17,8 @@ const parseWebSocketRequest = require('./lib/server/parse-websocket')
 
 const hasOwnProperty = Object.prototype.hasOwnProperty
 
+const SDP_TRICKLE_REGEX = /a=ice-options:trickle\s\n/
+
 /**
  * BitTorrent tracker server.
  *
@@ -524,7 +526,7 @@ class Server extends EventEmitter {
 
             peers.forEach((peer, i) => {
                 const { sdp } = params.offers[i].offer
-                const isTrickleSdp = /a=ice-options:trickle\s\n/g.test(sdp)
+                const isTrickleSdp = SDP_TRICKLE_REGEX.test(sdp)
                 if (isTrickleSdp) {
                     swarm.offers.set(params.offers[i].offer_id, peer.peerId)
                 }
