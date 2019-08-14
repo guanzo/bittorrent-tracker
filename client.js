@@ -1,4 +1,3 @@
-const { Buffer } = require('safe-buffer')
 const debug = require('debug')('bittorrent-tracker:client')
 const EventEmitter = require('events')
 const once = require('once')
@@ -129,9 +128,9 @@ class Client extends EventEmitter {
    * @param {number=} opts.left (if not set, calculated automatically)
    */
   start (opts) {
-    debug('send `start`')
     opts = this._defaultAnnounceOpts(opts)
     opts.event = 'started'
+    debug('send `start` %o', opts)
     this._announce(opts)
 
     // start announcing on intervals
@@ -149,9 +148,9 @@ class Client extends EventEmitter {
    * @param {number=} opts.left (if not set, calculated automatically)
    */
   stop (opts) {
-    debug('send `stop`')
     opts = this._defaultAnnounceOpts(opts)
     opts.event = 'stopped'
+    debug('send `stop` %o', opts)
     this._announce(opts)
   }
 
@@ -164,10 +163,10 @@ class Client extends EventEmitter {
    * @param {number=} opts.left (if not set, calculated automatically)
    */
   complete (opts) {
-    debug('send `complete`')
     if (!opts) opts = {}
     opts = this._defaultAnnounceOpts(opts)
     opts.event = 'completed'
+    debug('send `complete` %o', opts)
     this._announce(opts)
   }
 
@@ -180,9 +179,9 @@ class Client extends EventEmitter {
    * @param {number=} opts.left (if not set, calculated automatically)
    */
   update (opts) {
-    debug('send `update`')
     opts = this._defaultAnnounceOpts(opts)
     if (opts.event) delete opts.event
+    debug('send `update` %o', opts)
     this._announce(opts)
   }
 
