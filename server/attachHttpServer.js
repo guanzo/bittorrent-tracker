@@ -3,8 +3,7 @@ const http = require('http')
 function attachHttpServer(server) {
   const {
     onListening
-  , onError
-  , onHttpRequest 
+  , onError 
   } = server
 
   const httpServer = http.createServer();

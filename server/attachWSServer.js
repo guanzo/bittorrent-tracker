@@ -20,7 +20,7 @@ function setupHttpService(server) {
 }
 
 function setupWebSocketServer(server) {
-  const { onWebSocketConnection, onError } = server
+  const { onError } = server
   const options = {
     server: server.http,
     perMessageDeflate: false,

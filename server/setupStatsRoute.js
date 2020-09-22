@@ -19,27 +19,26 @@ const get8Chars =
         peerId => Buffer.from(peerId, "hex")
                         .toString()
                         .substring(0, 8)
-                                  
+              
+function addPeerClient( _client, peer) {
+    const clientId = peer.client.client;
+    const client = _clients[clientId] || {};
+    // If the client is not known show 8 chars from peerId as version
+    const version = peer.client.version 
+                    || get8Chars(peer.peerId)
+
+    if (!client[version]) client[version] = 1
+    else client[version]++
+
+    _clients[clientId] = client
+
+    return _clients                        
+}
+
 function groupByClient(allPeers) {
-    const clients = {};
-
-    Object.values(allPeers)
-          .forEach(
-              ( peer
-             , peer 
-                ) => {
-                        const client = clients[peer.client.client] || {};
-                        // If the client is not known show 8 chars from peerId as version
-                        const version = peer.client.version 
-                                      || get8Chars(peer.peerId)
-
-                        if (!client[version]) client[version] = 1
-                        else client[version]++
-
-                        clients[peer.client.client] = client
-                        
-                      }
-          )
+    const clients = 
+            Object.values(allPeers)
+                  .reduce(addPeerClient, {})
           
     return clients;
 }
@@ -160,3 +159,5 @@ function setupStatsRoute(server) {
     }
   });
 }
+
+module.exports = setupStatsRoute

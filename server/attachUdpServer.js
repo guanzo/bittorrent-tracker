@@ -1,29 +1,29 @@
 const dgram = require('dgram')
 
-function attachUdpServer({ onUdpRequest, onError }) {
+function attachUdpServer(server) {
   const isNode10 = /^v0.10./.test(process.version)
 
-  const udp4Opts = 
+  const udp4Options = 
           isNode10 
           ? "udp4" 
           : { type: "udp4"
             , reuseAddr: true 
             }
 
-  const udp4 = dgram.createSocket(upd4Opt)
+  const udp4 = dgram.createSocket(udp4Options)
 
   udp4.on("message", (msg, rinfo) => onUdpRequest(msg, rinfo))
-  udp4.on("error", (err) => _onError(err))
-  udp4.on("listening", onListening)
+  udp4.on("error", (err) => server.onError(err))
+  udp4.on("listening", server.onListening)
 
-  const udp6Opts = 
+  const udp6Options = 
           isNode10 
           ? "udp6" 
           : { type: "udp6"
             , reuseAddr: true 
             }
 
-  const udp6 = dgram.createSocket(udp6Opts)
+  const udp6 = dgram.createSocket(udp6Options)
 
   const onUdpRequest = (msg, rinfo) => {
     let params;
@@ -64,8 +64,8 @@ function attachUdpServer({ onUdpRequest, onError }) {
   }
 
   udp6.on("message", (msg, rinfo) => onUdpRequest(msg, rinfo))
-  udp6.on("error", err => _onError(err))
-  udp6.on("listening", onListening)
+  udp6.on("error", err => server.onError(err))
+  udp6.on("listening", server.onListening)
 
   server.udp4 = server.udp = udp4;
   server.udp6 = udp6;

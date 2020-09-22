@@ -6,6 +6,7 @@ const string2compact = require('string2compact')
 const attachHttpServer = require("./server/attachHttpServer");
 const attachUdpServer = require('./server/attachUdpServer')
 const attachWSServer = require('./server/attachWSServer')
+const setupStatsRoute = require('./server/setupStatsRoute')
 const common = require('./lib/common')
 const Swarm = require('./lib/server/swarm')
 
@@ -30,18 +31,20 @@ const SDP_TRICKLE_REGEX = /a=ice-options:trickle\s\n/
 const TEN_MINUTES = 10 * 60 * 1000
 
 class Server extends EventEmitter {
-  _listenCalled = false;
-  listening = false;
-  destroyed = false;
-  torrents = {};
-
-  http = null;
-  udp4 = null;
-  udp6 = null;
-  ws = null;
 
   constructor(opts = {}) {
     super();
+
+    this._listenCalled = false;
+    this.listening = false;
+    this.numListeners = 0
+    this.destroyed = false;
+    this.torrents = {};
+
+    this.http = null;
+    this.udp4 = null;
+    this.udp6 = null;
+    this.ws = null;
 
     debug("new server %s", JSON.stringify(opts));
 
@@ -64,15 +67,19 @@ class Server extends EventEmitter {
     if (opts.udp !== false) attachUdpServer(this);
     if (opts.stats !== false) setupStatsRoute(this);
 
-    let num = !!this.http + !!this.udp4 + !!this.udp6;
+    
     const self = this;
-    function onListening() {
-      num -= 1;
-      if (num === 0) {
-        self.listening = true;
-        debug("listening");
-        self.emit("listening");
-      }
+
+  }
+
+  onListening() {
+    const numServers = !!this.http + !!this.udp4 + !!this.udp6;
+    const numListeners = this.numListeners++
+
+    if (numListeners === numServers) {
+      this.listening = true;
+      debug("listening");
+      self.emit("listening");
     }
   }
 
@@ -145,16 +152,23 @@ class Server extends EventEmitter {
     else if (cb) cb();
   }
 
-  createSwarm(infoHash, cb) {
+  async createSwarm(infoHash, cb) {
     if (Buffer.isBuffer(infoHash)) infoHash = infoHash.toString("hex");
 
-    process.nextTick(() => {
-      const swarm = (this.torrents[infoHash] = new Server.Swarm(
-        infoHash,
-        this
-      ));
-      cb(null, swarm);
-    });
+    return new Promise(done => {
+
+      const createNewSwarm = () => {
+        const swarm = this.torrents[infoHash] = 
+                new Server.Swarm(
+                      infoHash,
+                      this
+                    );
+
+        done(swarm);
+      };
+
+      process.nextTick(createNewSwarm);
+    })
   }
 
   getSwarm(infoHash, cb) {
@@ -165,7 +179,19 @@ class Server extends EventEmitter {
     });
   }
 
-  _asyncRequest(params) {
+    // Get existing swarm, or create one if one does not exist
+  getOrCreateSwarm(params, cb) {
+    this.getSwarm(params.info_hash, (err, swarm) => {
+      if (err) return cb(err);
+      if (swarm) return cb(null, swarm);
+      this.createSwarm(params.info_hash, (err, swarm) => {
+        if (err) return cb(err);
+        cb(null, swarm);
+      });
+    });
+  }
+
+  async _Request(params) {
     if (params && params.action === common.ACTIONS.CONNECT) {
       return { action: common.ACTIONS.CONNECT }
     } else if (params && params.action === common.ACTIONS.ANNOUNCE) {
@@ -177,19 +203,7 @@ class Server extends EventEmitter {
     }
   }
 
-  _onRequest (params, cb) {
-    if (params && params.action === common.ACTIONS.CONNECT) {
-      cb(null, { action: common.ACTIONS.CONNECT });
-    } else if (params && params.action === common.ACTIONS.ANNOUNCE) {
-      this._onAnnounce(params, cb);
-    } else if (params && params.action === common.ACTIONS.SCRAPE) {
-      this._onScrape(params, cb);
-    } else {
-      cb(new Error("Invalid action"));
-    }
-  }
-
-  _onAnnounce(params, cb) {
+  async _onAsyncAnnounce(params) {
     const self = this;
 
     if (this._filter) {
@@ -197,27 +211,15 @@ class Server extends EventEmitter {
         // Presence of `err` means that this announce request is disallowed
         if (err) return cb(err);
 
-        getOrCreateSwarm((err, swarm) => {
+        getOrCreateSwarm(params, (err, swarm) => {
           if (err) return cb(err);
           announce(swarm);
         });
       });
     } else {
-      getOrCreateSwarm((err, swarm) => {
+      getOrCreateSwarm(params, (err, swarm) => {
         if (err) return cb(err);
         announce(swarm);
-      });
-    }
-
-    // Get existing swarm, or create one if one does not exist
-    function getOrCreateSwarm(cb) {
-      self.getSwarm(params.info_hash, (err, swarm) => {
-        if (err) return cb(err);
-        if (swarm) return cb(null, swarm);
-        self.createSwarm(params.info_hash, (err, swarm) => {
-          if (err) return cb(err);
-          cb(null, swarm);
-        });
       });
     }
 
@@ -328,4 +330,4 @@ function toNumber (x) {
 
 function noop () {}
 
-module.exports = Server
+module.exports = new Server()
