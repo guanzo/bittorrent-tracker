@@ -3,11 +3,11 @@ const EventEmitter = require('events')
 const series = require('run-series')
 const string2compact = require('string2compact')
 
-const attachHttpServer = require("./attachHttpServer");
-const attachUdpServer = require('./attachUdpServer')
-const attachWSServer = require('./attachWSServer')
-const common = require('../lib/common')
-const Swarm = require('../lib/server/swarm')
+const attachHttpServer = require("./server/attachHttpServer");
+const attachUdpServer = require('./server/attachUdpServer')
+const attachWSServer = require('./server/attachWSServer')
+const common = require('./lib/common')
+const Swarm = require('./lib/server/swarm')
 
 /**
  * BitTorrent tracker server.
