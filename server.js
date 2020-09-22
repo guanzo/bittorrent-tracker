@@ -9,6 +9,8 @@ const attachWSServer = require('./server/attachWSServer')
 const common = require('./lib/common')
 const Swarm = require('./lib/server/swarm')
 
+const SDP_TRICKLE_REGEX = /a=ice-options:trickle\s\n/
+
 /**
  * BitTorrent tracker server.
  *
@@ -173,8 +175,9 @@ class Server extends EventEmitter {
     } else {
       return new Error("Invalid action")
     }
+  }
 
-  _onRequest(params, cb) {
+  _onRequest (params, cb) {
     if (params && params.action === common.ACTIONS.CONNECT) {
       cb(null, { action: common.ACTIONS.CONNECT });
     } else if (params && params.action === common.ACTIONS.ANNOUNCE) {
