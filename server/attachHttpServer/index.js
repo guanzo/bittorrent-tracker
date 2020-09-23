@@ -1,4 +1,5 @@
 const http = require('http')
+const parseHttpRequest = require('./parseHttpRequest')
 
 function attachHttpServer(server) {
   const {
