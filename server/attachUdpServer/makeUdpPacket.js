@@ -1,4 +1,4 @@
-const common = require('../lib/common')
+const common = require('../../lib/common')
 
 function makeUdpPacket (params) {
   let packet

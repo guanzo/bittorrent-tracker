@@ -1,4 +1,5 @@
 const dgram = require('dgram')
+const makeUdpPacket = require('./makeUdpPacket')
 
 function attachUdpServer(server) {
   const isNode10 = /^v0.10./.test(process.version)

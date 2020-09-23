@@ -1,20 +1,3 @@
-const bencode = require('bencode')
-const debug = require('debug')('bittorrent-tracker:server')
-const dgram = require('dgram')
-const EventEmitter = require('events')
-const peerid = require('bittorrent-peerid')
-const series = require('run-series')
-const string2compact = require('string2compact')
-const WebSocketServer = require('ws').Server
-const attachHttpServer = require("./attachHttpServer");
-const attachUdpServer = require('./attachUdpServer')
-const common = require('../lib/common')
-const Swarm = require('../lib/server/swarm')
-const parseHttpRequest = require('../lib/server/parse-http')
-const parseUdpRequest = require('../lib/server/parse-udp')
-const parseWebSocketRequest = require('../lib/server/parse-websocket')
-const makeUdpPacket = require('./makeUdpPacket')
-
 const get8Chars = 
         peerId => Buffer.from(peerId, "hex")
                         .toString()
