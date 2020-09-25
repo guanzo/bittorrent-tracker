@@ -267,32 +267,29 @@ class Server extends EventEmitter {
     if (this.udp6) this.udp6.bind(udpPort, udp6Hostname)
   }
 
-  close (cb = noop) {
-    debug('close')
 
-    this.listening = false
-    this.destroyed = true
+  close(cb) {
+    debug("close");
 
-    if (this.udp4) {
-      try {
-        this.udp4.close()
-      } catch (err) {}
+    this.listening = false;
+    this.destroyed = true;
+
+    const closeService = service => {
+      if (service) {
+        try {
+          service.close();
+        } catch (err) {
+          this.onError(err);
+        }
+      }
     }
 
-    if (this.udp6) {
-      try {
-        this.udp6.close()
-      } catch (err) {}
-    }
+    [this.udp4,
+    this.udp6,
+    this.ws
+    ].forEach(closeService)
 
-    if (this.ws) {
-      try {
-        this.ws.close()
-      } catch (err) {}
-    }
-
-    if (this.http) this.http.close(cb)
-    else cb(null)
+    if (cb) cb(null);
   }
 
   createSwarm (infoHash, cb) {
