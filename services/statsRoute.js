@@ -1,3 +1,5 @@
+const attachHttpServer = require('./attachHttp')
+
 const get8Chars = 
         peerId => Buffer.from(peerId, "hex")
                         .toString()
