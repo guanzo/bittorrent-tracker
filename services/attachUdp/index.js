@@ -1,8 +1,11 @@
 const dgram = require('dgram')
+
+const common = require('../../lib/common')
+
 const makeUdpPacket = require('./makeUdpPacket')
 const parseUdpRequest = require('./parseUdpRequest')
 
-function attachUdpServer(server) {
+function attachUdpServer(server, onListening) {
   const isNode10 = /^v0.10./.test(process.version)
 
   const udp4Options = 
@@ -16,7 +19,7 @@ function attachUdpServer(server) {
 
   udp4.on("message", (msg, rinfo) => onUdpRequest(msg, rinfo))
   udp4.on("error", (err) => server.onError(err))
-  udp4.on("listening", server.onListening)
+  udp4.on("listening", onListening)
 
   const udp6Options = 
           isNode10 
@@ -67,9 +70,9 @@ function attachUdpServer(server) {
 
   udp6.on("message", (msg, rinfo) => onUdpRequest(msg, rinfo))
   udp6.on("error", err => server.onError(err))
-  udp6.on("listening", server.onListening)
+  udp6.on("listening", onListening)
 
-  server.udp4 = server.udp = udp4;
+  server.udp4 = server.udp = udp4
   server.udp6 = udp6;
 }
 

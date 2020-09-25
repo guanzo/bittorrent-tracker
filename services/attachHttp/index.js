@@ -1,14 +1,16 @@
 const http = require('http')
+const bencode = require('bencode')
+
+const common = require('../../lib/common')
 const parseHttpRequest = require('./parseHttpRequest')
 
-function attachHttpServer(server) {
+function attachHttpServer(server, onListening) {
   const {
-    onListening
-  , onError 
+    onError 
   } = server
 
   const httpServer = http.createServer();
-
+  
   httpServer.on("error", onError);
   httpServer.on("listening", onListening);
 

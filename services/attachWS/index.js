@@ -1,11 +1,16 @@
 const WebSocketServer = require("ws").Server
+const debug = require('debug')('bittorrent-tracker:server')
+
 const parseWebSocketRequest = require("./parseWebsocketRequest")
 const attachHttpServer = require("../attachHttp")
 
-function setupHttpService(server) {
+const SDP_TRICKLE_REGEX = /a=ice-options:trickle\s\n/
+
+const common = require('../../lib/common')
+function setupHttpService(server, onListening) {
   if (server.http) return server.http
   else {
-    attachHttpServer(server)
+    attachHttpServer(server, onListening)
 
     // For websocket trackers, we only need
     // to handle the UPGRADE http method.
@@ -35,21 +40,21 @@ function setupWebSocketServer(server) {
     socket.peerId = null // as hex
     socket.infoHashes = [] // swarms that server socket is participating in
     socket.onSend = (err) => {
-      server.onWebSocketSend(socket, err)
+      onWebSocketSend(socket, err)
     }
 
     socket.onMessageBound = (params) => {
-      server.onWebSocketRequest(socket, opts, params)
+      onWebSocketRequest(socket, opts, params)
     }
     socket.on("message", socket.onMessageBound)
 
     socket.onErrorBound = (err) => {
-      server.onWebSocketError(socket, err)
+      onWebSocketError(socket, err)
     }
     socket.on("error", socket.onErrorBound)
 
     socket.onCloseBound = () => {
-      server.onWebSocketClose(socket)
+      onWebSocketClose(socket)
     }
     socket.on("close", socket.onCloseBound)
   }
@@ -207,7 +212,7 @@ function setupWebSocketServer(server) {
   }
 
   const onWebSocketSend = (socket, err) => {
-    if (err) server.onWebSocketError(socket, err)
+    if (err) onWebSocketError(socket, err)
   }
 
   const onWebSocketClose = (socket) => {
@@ -257,7 +262,7 @@ function setupWebSocketServer(server) {
   const onWebSocketError = (socket, err) => {
     debug("websocket error %s", err.message || err)
     server.emit("warning", err)
-    server.onWebSocketClose(socket)
+    onWebSocketClose(socket)
   }
 
   const onConnection = (socket, req) => {
@@ -274,9 +279,11 @@ function setupWebSocketServer(server) {
   server.ws = ws
 }
 
-function createWebSocketServer(server) {
-  setupHttpService(server)
+function createWebSocketServer(server, onListening) {
+  setupHttpService(server, onListening)
   setupWebSocketServer(server)
 }
 
 module.exports = createWebSocketServer
+
+function noop() { }

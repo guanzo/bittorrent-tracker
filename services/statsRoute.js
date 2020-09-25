@@ -74,10 +74,11 @@ function addTorrentStats(allPeers, torrent) {
     return result
 }
 
+
 const countPeersF =
         peers => 
             filterFunction => 
-                peers.filter(filterFunction).length
+                Object.values(peers).filter(filterFunction).length
 
 const isActive = torrent => (torrent.peers.keys.length > 0)
 const countActive = torrents => torrents.filter(isActive).length
@@ -90,6 +91,7 @@ const isIPv6 = peer => peer.ipv6;
 function getStats(server) {
     const torrents = Object.values(server.torrents);
     const allPeers = torrents.reduce(addTorrentStats, {})
+
     const countAllPeers = countPeersF(allPeers);
     const activeTorrents = countActive(torrents);
 
