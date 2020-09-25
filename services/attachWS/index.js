@@ -133,7 +133,7 @@ function setupWebSocketServer(server) {
           }
 
           peers.forEach((peer, i) => {
-            const { sdp } = params.offers[i].offer
+            const { sdp } = params.offers && params.offers[i] && params.offers[i].offer || {}
             const isTrickleSdp = SDP_TRICKLE_REGEX.test(sdp)
             if (isTrickleSdp) {
               swarm.offers.set(params.offers[i].offer_id, peer.peerId)
