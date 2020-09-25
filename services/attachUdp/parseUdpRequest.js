@@ -1,12 +1,12 @@
 module.exports = parseUdpRequest
 
-var ipLib = require('ip')
-var common = require('../common')
+const ipLib = require('ip')
+const common = require('../../lib/common')
 
 function parseUdpRequest (msg, rinfo) {
   if (msg.length < 16) throw new Error('received packet is too short')
 
-  var params = {
+  const params = {
     connectionId: msg.slice(0, 8), // 64-bit
     action: msg.readUInt32BE(8),
     transactionId: msg.readUInt32BE(12),
@@ -29,7 +29,7 @@ function parseUdpRequest (msg, rinfo) {
     params.event = common.EVENT_IDS[msg.readUInt32BE(80)]
     if (!params.event) throw new Error('invalid event') // early return
 
-    var ip = msg.readUInt32BE(84) // optional
+    const ip = msg.readUInt32BE(84) // optional
     params.ip = ip
       ? ipLib.toString(ip)
       : rinfo.address

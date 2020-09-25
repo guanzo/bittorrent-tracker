@@ -3,10 +3,10 @@ const EventEmitter = require('events')
 const series = require('run-series')
 const string2compact = require('string2compact')
 
-const attachHttpServer = require("./server/attachHttpServer");
-const attachUdpServer = require('./server/attachUdpServer')
-const attachWSServer = require('./server/attachWSServer')
-const setupStatsRoute = require('./server/setupStatsRoute')
+const attachHttpServer = require('./services/attachHttp')
+const attachUdpServer = require('./services/attachUdp')
+const attachWSServer = require('./services/attachWS')
+const setupStatsRoute = require('./services/statsRoute')
 const common = require('./lib/common')
 const Swarm = require('./lib/server/swarm')
 
@@ -333,4 +333,4 @@ function toNumber (x) {
 
 function noop () {}
 
-module.exports = new Server()
+module.exports = Server

@@ -1,6 +1,6 @@
 const WebSocketServer = require("ws").Server
 const parseWebSocketRequest = require("./parseWebsocketRequest")
-const attachHttpServer = require("../attachHttpServer")
+const attachHttpServer = require("../attachHttp")
 
 function setupHttpService(server) {
   if (server.http) return server.http
