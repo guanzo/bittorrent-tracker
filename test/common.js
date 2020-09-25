@@ -8,11 +8,11 @@ exports.createServer = function (t, opts, cb) {
   opts.ws = (opts.serverType === 'ws')
 
   var server = new Server(opts)
-
   server.on('error', function (err) { t.error(err) })
   server.on('warning', function (err) { t.error(err) })
 
   server.listen(0, function () {
+    console.log('on server hear')
     var port = server[opts.serverType].address().port
     var announceUrl
     if (opts.serverType === 'http') {

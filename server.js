@@ -31,7 +31,6 @@ const SDP_TRICKLE_REGEX = /a=ice-options:trickle\s\n/
 const TEN_MINUTES = 10 * 60 * 1000
 
 class Server extends EventEmitter {
-
   constructor(opts = {}) {
     super();
 
@@ -67,9 +66,7 @@ class Server extends EventEmitter {
     if (opts.udp !== false) attachUdpServer(this);
     if (opts.stats !== false) setupStatsRoute(this);
 
-    
     const self = this;
-
   }
 
   onListening() {
