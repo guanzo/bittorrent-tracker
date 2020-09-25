@@ -3,9 +3,9 @@ const EventEmitter = require('events')
 const series = require('run-series')
 const string2compact = require('string2compact')
 
-const attachHttpServer = require('./services/attachHttp')
-const attachUdpServer = require('./services/attachUdp')
-const attachWSServer = require('./services/attachWS')
+const attachHttpService = require('./services/attachHttp')
+const attachUdpService = require('./services/attachUdp')
+const attachWSService = require('./services/attachWS')
 const setupStatsRoute = require('./services/statsRoute')
 const common = require('./lib/common')
 const Swarm = require('./lib/server/swarm')
@@ -59,9 +59,9 @@ class Server extends EventEmitter {
     this.peersCacheLength = peersCacheLength;
     this.peersCacheTtl = peersCacheTtl;
 
-    if (opts.http !== false) attachHttpServer(this, onListening);
-    if (opts.ws !== false) attachWSServer(this, onListening);
-    if (opts.udp !== false) attachUdpServer(this, onListening);
+    if (opts.http !== false) attachHttpService(this, onListening);
+    if (opts.ws !== false) attachWSService(this, onListening);
+    if (opts.udp !== false) attachUdpService(this, onListening);
     if (opts.stats !== false) setupStatsRoute(this, onListening);
 
     let num = !!this.http + !!this.udp4 + !!this.udp6
@@ -122,7 +122,6 @@ class Server extends EventEmitter {
     if (this.udp6) this.udp6.bind(udpPort, udp6Hostname)
   }
 
-
   close(cb) {
     debug("close");
 
@@ -139,9 +138,9 @@ class Server extends EventEmitter {
       }
     }
 
-    [this.udp4,
-    this.udp6,
-    this.ws
+    [ this.udp4,
+      this.udp6,
+      this.ws
     ].forEach(closeService)
 
     if (cb) cb(null);
