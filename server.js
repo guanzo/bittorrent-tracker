@@ -167,109 +167,130 @@ class Server extends EventEmitter {
     })
   }
 
-  async getSwarm(infoHash) {
+  getSwarm(infoHash, cb) {
     if (Buffer.isBuffer(infoHash)) infoHash = infoHash.toString("hex");
 
-    return new Promise(done => {
-      const returnSwarm = () => {
-        done(this.torrents[infoHash]);
-      };
-    
-      process.nextTick(returnSwarm);      
-    })
+    process.nextTick(() => {
+      cb(null, this.torrents[infoHash]);
+    });
   }
 
     // Get existing swarm, or create one if one does not exist
-  async getOrCreateSwarm(params) {
-    try {
-      const swarm = this.getSwarm(params.info_hash)
-                  || await this.createSwarm(params.info_hash)
-
-    }
-    catch(err) { return err }
-
-    return swarm
-  }
-
-  async _Request(params) {
-    if (params && params.action === common.ACTIONS.CONNECT) {
-      return { action: common.ACTIONS.CONNECT }
-    } else if (params && params.action === common.ACTIONS.ANNOUNCE) {
-      return await this._onAnnounce(params)
-    } else if (params && params.action === common.ACTIONS.SCRAPE) {
-      return this._onScrape(params)
-    } else {
-      return new Error("Invalid action")
-    }
-  }
-
-  fimdIpv4peers(peers) {
-    return string2compact(
-      peers
-        .filter(peer => common.IPV4_RE.test(peer.ip))
-        .map(peer => `${peer.ip}:${peer.port}`)
-    );
-  }
-
-  findIpv6Peers(peers) {
-    string2compact(
-          peers
-            .filter(peer => common.IPV6_RE.test(peer.ip))
-            .map(peer => `[${peer.ip}]:${peer.port}`)
-        );
-  }
-
-  announce(swarm) {
-    if (!params.event || params.event === "empty") params.event = "update";
-
-    const onAnnouced = (err, response) => {
+  getOrCreateSwarm(params, cb) {
+    this.getSwarm(params.info_hash, (err, swarm) => {
       if (err) return cb(err);
-
-      if (!response.action) response.action = common.ACTIONS.ANNOUNCE;
-      if (!response.interval)
-        response.interval = Math.ceil(this.intervalMs / 1000);
-
-      if (params.compact === 1) {
-        const peers = response.peers;
-
-        response.peers = this.findIpv4Peers(peers)
-        response.peers6 = this.findIpv6Peers(peers)
-
-      } else if (params.compact === 0) {
-        // IPv6 peers are not separate for non-compact responses
-        response.peers = response.peers.map((peer) => {
-          return {
-            "peer id": common.hexToBinary(peer.peerId),
-            ip: peer.ip,
-            port: peer.port,
-          };
-        });
-      } // else, return full peer objects (used for websocket responses)
-
-      cb(null, response);
-    };
-
-    swarm.announce(params, onAnnouced);
+      if (swarm) return cb(null, swarm);
+      this.createSwarm(params.info_hash, (err, swarm) => {
+        if (err) return cb(err);
+        cb(null, swarm);
+      });
+    });
   }
 
-  async _onAsyncAnnounce(params) {
-    let _params = params;
+  // async _Request(params) {
+  //   if (params && params.action === common.ACTIONS.CONNECT) {
+  //     return { action: common.ACTIONS.CONNECT }
+  //   } else if (params && params.action === common.ACTIONS.ANNOUNCE) {
+  //     return this._onAnnounce(params)
+  //   } else if (params && params.action === common.ACTIONS.SCRAPE) {
+  //     return this._onScrape(params)
+  //   } else {
+  //     return new Error("Invalid action")
+  //   }
+  // }
+
+  _onRequest (params, cb) {
+    console.log('request received')
+    if (params && params.action === common.ACTIONS.CONNECT) {
+      cb(null, { action: common.ACTIONS.CONNECT });
+    } else if (params && params.action === common.ACTIONS.ANNOUNCE) {
+      this._onAnnounce(params, cb);
+    } else if (params && params.action === common.ACTIONS.SCRAPE) {
+      this._onScrape(params, cb);
+    } else {
+      cb(new Error("Invalid action"));
+    }
+  }
+
+  _onAnnounce(params, cb) {
+    const self = this;
 
     if (this._filter) {
-      _params = this._filter(params.info_hash, params);
+      this._filter(params.info_hash, params, (err) => {
+        // Presence of `err` means that this announce request is disallowed
+        if (err) return cb(err);
+
+        getOrCreateSwarm((err, swarm) => {
+          if (err) return cb(err);
+          announce(swarm);
+        });
+      });
+    } else {
+      getOrCreateSwarm((err, swarm) => {
+        if (err) return cb(err);
+        announce(swarm);
+      });
     }
 
-    let swarm;
-
-    try {
-      swarm = await getOrCreateSwarm(params);
-    } catch (err) {
-      return err;
+    // Get existing swarm, or create one if one does not exist
+    function getOrCreateSwarm(cb) {
+      self.getSwarm(params.info_hash, (err, swarm) => {
+        if (err) return cb(err);
+        if (swarm) return cb(null, swarm);
+        self.createSwarm(params.info_hash, (err, swarm) => {
+          if (err) return cb(err);
+          cb(null, swarm);
+        });
+      });
     }
 
-    this.announce(swarm);
+    function announce(swarm) {
+      if (!params.event || params.event === "empty") params.event = "update";
+      swarm.announce(params, (err, response) => {
+        if (err) return cb(err);
+
+        if (!response.action) response.action = common.ACTIONS.ANNOUNCE;
+        if (!response.interval)
+          response.interval = Math.ceil(self.intervalMs / 1000);
+
+        if (params.compact === 1) {
+          const peers = response.peers;
+
+          // Find IPv4 peers
+          response.peers = string2compact(
+            peers
+              .filter((peer) => {
+                return common.IPV4_RE.test(peer.ip);
+              })
+              .map((peer) => {
+                return `${peer.ip}:${peer.port}`;
+              })
+          );
+          // Find IPv6 peers
+          response.peers6 = string2compact(
+            peers
+              .filter((peer) => {
+                return common.IPV6_RE.test(peer.ip);
+              })
+              .map((peer) => {
+                return `[${peer.ip}]:${peer.port}`;
+              })
+          );
+        } else if (params.compact === 0) {
+          // IPv6 peers are not separate for non-compact responses
+          response.peers = response.peers.map((peer) => {
+            return {
+              "peer id": common.hexToBinary(peer.peerId),
+              ip: peer.ip,
+              port: peer.port,
+            };
+          });
+        } // else, return full peer objects (used for websocket responses)
+
+        cb(null, response);
+      });
+    }
   }
-
 
   _onScrape(params, cb) {
     if (params.info_hash == null) {
