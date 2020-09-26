@@ -8,7 +8,7 @@ const attachUdpService = require('./services/attachUdp')
 const attachWSService = require('./services/attachWS')
 const setupStatsRoute = require('./services/statsRoute')
 const common = require('./lib/common')
-const Swarm = require('./lib/server/swarm')
+const Swarm = require('./swarm')
 
 /**
  * BitTorrent tracker server.
@@ -163,6 +163,22 @@ class Server extends EventEmitter {
     })
   }
 
+      // Get existing swarm, or create one if one does not exist
+  getOrCreateSwarm(params) {
+    const gotOrCreatedSwarm = resolve => {
+      this.getSwarm(params.info_hash, (err, swarm) => {
+        if (err) return resolve(err)
+        if (swarm) return resolve(swarm)
+        this.createSwarm(params.info_hash, (err, swarm) => {
+          if (err) return resolve(err)
+          resolve(swarm)
+        })
+      })
+    }
+
+    return new Promise(gotOrCreatedSwarm)
+  }
+
   _onRequest (params, cb) {
     if (params && params.action === common.ACTIONS.CONNECT) {
       cb(null, { action: common.ACTIONS.CONNECT })
@@ -179,37 +195,24 @@ class Server extends EventEmitter {
     const self = this
 
     if (this._filter) {
-      this._filter(params.info_hash, params, err => {
+      const onFiltered = err => {
         // Presence of `err` means that this announce request is disallowed
         if (err) return cb(err)
 
-        getOrCreateSwarm((err, swarm) => {
-          if (err) return cb(err)
-          announce(swarm)
-        })
-      })
-    } else {
-      getOrCreateSwarm((err, swarm) => {
-        if (err) return cb(err)
-        announce(swarm)
-      })
-    }
+        this.getOrCreateSwarm(params)
+          .then(announce)
+      }
 
-    // Get existing swarm, or create one if one does not exist
-    function getOrCreateSwarm (cb) {
-      self.getSwarm(params.info_hash, (err, swarm) => {
-        if (err) return cb(err)
-        if (swarm) return cb(null, swarm)
-        self.createSwarm(params.info_hash, (err, swarm) => {
-          if (err) return cb(err)
-          cb(null, swarm)
-        })
-      })
+      this._filter(params.info_hash, params, onFiltered)
+    } else {
+      this.getOrCreateSwarm(params)
+        .then(announce)
     }
 
     function announce (swarm) {
       if (!params.event || params.event === 'empty') params.event = 'update'
-      swarm.announce(params, (err, response) => {
+
+      const _onAnnounce = (err, response) => {
         if (err) return cb(err)
 
         if (!response.action) response.action = common.ACTIONS.ANNOUNCE
@@ -242,7 +245,9 @@ class Server extends EventEmitter {
         } // else, return full peer objects (used for websocket responses)
 
         cb(null, response)
-      })
+      }
+
+      swarm.announce(params, _onAnnounce )
     }
   }
 

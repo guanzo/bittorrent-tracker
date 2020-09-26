@@ -1,12 +1,13 @@
 const WebSocketServer = require("ws").Server
 const debug = require('debug')('bittorrent-tracker:server')
 
+const common = require('../../lib/common')
+
 const parseWebSocketRequest = require("./parseWebsocketRequest")
 const attachHttpServer = require("../attachHttp")
 
 const SDP_TRICKLE_REGEX = /a=ice-options:trickle\s\n/
 
-const common = require('../../lib/common')
 function setupHttpService(server, onListening) {
   if (server.http) return server.http
   else {
