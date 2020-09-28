@@ -1,11 +1,10 @@
 {
-  "name": "bittorrent-tracker",
-  "description": "Simple, robust, BitTorrent tracker (client & server) implementation",
-  "version": "9.15.0-arc-10",
+  "name": "arcio-tracker",
+  "description": "arcui tracker (client & server) implementation",
+  "version": "10.00.0",
   "author": {
-    "name": "WebTorrent LLC",
-    "email": "feross@webtorrent.io",
-    "url": "https://webtorrent.io"
+    "name": "Arcio",
+    "email": "team@arc.io"
   },
   "bin": {
     "bittorrent-tracker": "./bin/cmd.js"
@@ -19,9 +18,6 @@
   "chromeapp": {
     "./server.js": false,
     "dgram": "chrome-dgram"
-  },
-  "bugs": {
-    "url": "https://github.com/webtorrent/bittorrent-tracker/issues"
   },
   "dependencies": {
     "bencode": "^2.0.1",
@@ -55,17 +51,6 @@
   "engines": {
     "node": ">=10"
   },
-  "keywords": [
-    "bittorrent",
-    "p2p",
-    "peer",
-    "peer-to-peer",
-    "stream",
-    "torrent",
-    "tracker",
-    "wire"
-  ],
-  "license": "MIT",
   "main": "index.js",
   "optionalDependencies": {
     "bufferutil": "^4.0.1",
@@ -73,25 +58,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/webtorrent/bittorrent-tracker.git"
+    "url": "https://github.com/webtorrent/bittorrent-tracker.git"
   },
   "scripts": {
     "watch": "tape-watch test/*.js",
-    "test": "tape test/*.js",
-    "update-authors": "./tools/update-authors.sh"
-  },
-  "funding": [
-    {
-      "type": "github",
-      "url": "https://github.com/sponsors/feross"
-    },
-    {
-      "type": "patreon",
-      "url": "https://www.patreon.com/feross"
-    },
-    {
-      "type": "consulting",
-      "url": "https://feross.org/support"
-    }
-  ]
+    "test": "tape test/*.js"
+  }
 }
