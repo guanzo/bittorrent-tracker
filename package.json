@@ -76,7 +76,7 @@
     "url": "git://github.com/webtorrent/bittorrent-tracker.git"
   },
   "scripts": {
-    "watch": "tape-watch test/server.js",
+    "watch": "tape-watch test/*.js",
     "test": "tape test/*.js",
     "update-authors": "./tools/update-authors.sh"
   },

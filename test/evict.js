@@ -9,7 +9,7 @@ var peerId2 = Buffer.from('12345678901234567890')
 var peerId3 = Buffer.from('23456789012345678901')
 
 function serverTest (t, serverType, serverFamily) {
-  t.plan(10)
+  t.plan(9)
 
   var hostname = serverFamily === 'inet6'
     ? '[::1]'
@@ -51,8 +51,8 @@ function serverTest (t, serverType, serverFamily) {
       client2.start()
 
       client2.once('update', function (data) {
-        server.getSwarm(infoHash, function (err, swarm) {
-          t.error(err)
+        server.getSwarm(infoHash)
+          .then(function (swarm) {
 
           t.equal(swarm.complete + swarm.incomplete, 2)
 

@@ -128,9 +128,8 @@ function setupWebSocketServer(server) {
         debug("got %s offers from %s", params.offers.length, params.peer_id)
         debug("got %s peers from swarm %s", peers.length, params.info_hash)
 
-        server.getSwarm(params.info_hash, (err, swarm) => {
+        const gotSwarm = swarm => {
           if (server.destroyed) return
-          if (err) return server.emit("warning", err)
           if (!swarm) {
             return server.emit(
               "warning",
@@ -157,7 +156,12 @@ function setupWebSocketServer(server) {
             )
             debug("sent offer to %s from %s", peer.peerId, params.peer_id)
           })
-        })
+        }
+
+        server.getSwarm(params.info_hash)
+          .then()
+          .catch(err => server.emit("warning", err))
+
       }
 
       const done = () => {
@@ -174,9 +178,12 @@ function setupWebSocketServer(server) {
           params.peer_id
         )
 
-        server.getSwarm(params.info_hash, (err, swarm) => {
+        server.getSwarm(params.info_hash)
+              .then(gotSwarm)
+              .catch(err => server.emit("warning", err))
+
+        const gotSwarm = swarm => {
           if (server.destroyed) return
-          if (err) return server.emit("warning", err)
           if (!swarm) {
             return server.emit(
               "warning",
@@ -205,7 +212,7 @@ function setupWebSocketServer(server) {
           debug("sent answer to %s from %s", toPeer.peerId, params.peer_id)
 
           done()
-        })
+        }
       } else {
         done()
       }

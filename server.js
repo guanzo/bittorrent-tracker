@@ -155,25 +155,33 @@ class Server extends EventEmitter {
     })
   }
 
-  getSwarm (infoHash, cb) {
+  getSwarm(infoHash) {
     if (Buffer.isBuffer(infoHash)) infoHash = infoHash.toString('hex')
 
-    process.nextTick(() => {
-      cb(null, this.torrents[infoHash])
-    })
+    const gotSwarm = resolve => {
+      process.nextTick(() => {
+        resolve(this.torrents[infoHash])
+      })
+    }
+
+    return new Promise(gotSwarm)
   }
 
-      // Get existing swarm, or create one if one does not exist
+  // Get existing swarm, or create one if one does not exist
   getOrCreateSwarm(params) {
     const gotOrCreatedSwarm = resolve => {
-      this.getSwarm(params.info_hash, (err, swarm) => {
-        if (err) return resolve(err)
+      const gotSwarm = swarm => {
         if (swarm) return resolve(swarm)
+
         this.createSwarm(params.info_hash, (err, swarm) => {
           if (err) return resolve(err)
           resolve(swarm)
         })
-      })
+      }
+
+
+      this.getSwarm(params.info_hash)
+        .then(gotSwarm)
     }
 
     return new Promise(gotOrCreatedSwarm)
@@ -260,8 +268,7 @@ class Server extends EventEmitter {
 
     series(params.info_hash.map(infoHash => {
       return cb => {
-        this.getSwarm(infoHash, (err, swarm) => {
-          if (err) return cb(err)
+        const gotSwarm = swarm => {
           if (swarm) {
             swarm.scrape(params, (err, scrapeInfo) => {
               if (err) return cb(err)
@@ -274,7 +281,11 @@ class Server extends EventEmitter {
           } else {
             cb(null, { infoHash, complete: 0, incomplete: 0 })
           }
-        })
+        }
+
+        this.getSwarm(infoHash)
+          .then(gotSwarm)
+          .catch(cb)
       }
     }), (err, results) => {
       if (err) return cb(err)
