@@ -191,64 +191,59 @@ class Server extends EventEmitter {
     }
   }
 
-  _onAnnounce (params, cb) {
+  async _onAnnounce (params, cb) {
     const self = this
 
     if (this._filter) {
-      const onFiltered = err => {
-        // Presence of `err` means that this announce request is disallowed
-        if (err) return cb(err)
-
-        this.getOrCreateSwarm(params)
-          .then(announce)
-      }
-
-      this._filter(params.info_hash, params, onFiltered)
-    } else {
-      this.getOrCreateSwarm(params)
-        .then(announce)
+      const { allowed, info } = await this._filter(params.info_hash, params)
+      if (!allowed) return info
     }
 
-    function announce (swarm) {
-      if (!params.event || params.event === 'empty') params.event = 'update'
+    const swarm = await this.getOrCreateSwarm(params)
 
-      const _onAnnounce = (err, response) => {
-        if (err) return cb(err)
+    if (!params.event || params.event === 'empty') params.event = 'update'
+    
+    const _onAnnounce = async (err, response) => {
+      if (err) return cb(err)
 
-        if (!response.action) response.action = common.ACTIONS.ANNOUNCE
-        if (!response.interval) response.interval = Math.ceil(self.intervalMs / 1000)
+      if (!response.action) response.action = common.ACTIONS.ANNOUNCE
+      if (!response.interval) response.interval = Math.ceil(self.intervalMs / 1000)
 
-        if (params.compact === 1) {
-          const peers = response.peers
+      if (params.compact === 1) {
+        const peers = response.peers
 
-          // Find IPv4 peers
-          response.peers = string2compact(peers.filter(peer => {
-            return common.IPV4_RE.test(peer.ip)
-          }).map(peer => {
-            return `${peer.ip}:${peer.port}`
-          }))
-          // Find IPv6 peers
-          response.peers6 = string2compact(peers.filter(peer => {
-            return common.IPV6_RE.test(peer.ip)
-          }).map(peer => {
-            return `[${peer.ip}]:${peer.port}`
-          }))
-        } else if (params.compact === 0) {
-          // IPv6 peers are not separate for non-compact responses
-          response.peers = response.peers.map(peer => {
-            return {
-              'peer id': common.hexToBinary(peer.peerId),
-              ip: peer.ip,
-              port: peer.port
-            }
-          })
-        } // else, return full peer objects (used for websocket responses)
+        // Find IPv4 peers
+        const peers4 =  peers
+                          .filter(peer => common.IPV4_RE.test(peer.ip))
+                          .map(peer => `${peer.ip}:${peer.port}`)
 
-        cb(null, response)
-      }
+        response.peers = string2compact(peers4)
 
-      swarm.announce(params, _onAnnounce )
+        // Find IPv6 peers
+        const peers6 = peers
+                            .filter(peer => common.IPV6_RE.test(peer.ip))
+                            .map(peer => `[${peer.ip}]:${peer.port}`)
+
+        response.peer6 = string2compact(peers6)
+      } 
+      else if (params.compact === 0) {
+        // IPv6 peers are not separate for non-compact responses
+        const formatIPv6Peer =
+                peer => ({
+                  'peer id': common.hexToBinary(peer.peerId),
+                  ip: peer.ip,
+                  port: peer.port
+                })
+
+        response.peers = 
+          response.peers.map(formatIPv6Peer)
+
+      } // else, return full peer objects (used for websocket responses)
+
+      cb(null, response)
     }
+
+    swarm.announce(params, _onAnnounce )
   }
 
   _onScrape (params, cb) {
