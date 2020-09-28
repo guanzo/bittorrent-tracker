@@ -4,10 +4,10 @@ const once = require('once')
 const parallel = require('run-parallel')
 const Peer = require('simple-peer')
 
-const common = require('./lib/common')
-const HTTPTracker = require('./lib/client/http-tracker') // empty object in browser
-const UDPTracker = require('./lib/client/udp-tracker') // empty object in browser
-const WebSocketTracker = require('./lib/client/websocket-tracker')
+const common = require('../lib/common')
+const HTTPTracker = require('./http-tracker') // empty object in browser
+const UDPTracker = require('./udp-tracker') // empty object in browser
+const WebSocketTracker = require('./websocket-tracker')
 
 /**
  * BitTorrent tracker client.

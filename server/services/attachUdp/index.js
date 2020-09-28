@@ -1,6 +1,6 @@
 const dgram = require('dgram')
 
-const common = require('../../lib/common')
+const common = require('../../../lib/common')
 
 const makeUdpPacket = require('./makeUdpPacket')
 const parseUdpRequest = require('./parseUdpRequest')

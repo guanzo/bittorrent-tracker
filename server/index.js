@@ -7,7 +7,7 @@ const attachHttpService = require('./services/attachHttp')
 const attachUdpService = require('./services/attachUdp')
 const attachWSService = require('./services/attachWS')
 const setupStatsRoute = require('./services/statsRoute')
-const common = require('./lib/common')
+const common = require('../lib/common')
 const Swarm = require('./swarm')
 
 /**

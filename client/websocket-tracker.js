@@ -3,7 +3,7 @@ const Peer = require('simple-peer')
 const randombytes = require('randombytes')
 const Socket = require('simple-websocket')
 
-const common = require('../common')
+const common = require('../lib/common')
 const Tracker = require('./tracker')
 
 // Use a socket pool, so tracker clients share WebSocket objects for the same server.

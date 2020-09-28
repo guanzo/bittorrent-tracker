@@ -1,6 +1,6 @@
 module.exports = parseHttpRequest
 
-const common = require('../../lib/common')
+const common = require('../../../lib/common')
 
 function parseHttpRequest (req, opts) {
   if (!opts) opts = {}

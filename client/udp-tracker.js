@@ -5,7 +5,7 @@ const debug = require('debug')('bittorrent-tracker:udp-tracker')
 const dgram = require('dgram')
 const randombytes = require('randombytes')
 
-const common = require('../common')
+const common = require('../lib/common')
 const Tracker = require('./tracker')
 
 /**

@@ -1,7 +1,7 @@
 module.exports = parseUdpRequest
 
 const ipLib = require('ip')
-const common = require('../../lib/common')
+const common = require('../../../lib/common')
 
 function parseUdpRequest (msg, rinfo) {
   if (msg.length < 16) throw new Error('received packet is too short')

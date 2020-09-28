@@ -1,7 +1,7 @@
 const WebSocketServer = require("ws").Server
 const debug = require('debug')('bittorrent-tracker:server')
 
-const common = require('../../lib/common')
+const common = require('../../../lib/common')
 
 const parseWebSocketRequest = require("./parseWebsocketRequest")
 const attachHttpServer = require("../attachHttp")
