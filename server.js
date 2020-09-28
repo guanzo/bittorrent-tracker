@@ -146,7 +146,7 @@ class Server extends EventEmitter {
     if (cb) cb(null);
   }
 
-  createSwarm(infoHash) {
+  async createSwarm(infoHash) {
     if (Buffer.isBuffer(infoHash)) infoHash = infoHash.toString('hex')
 
     const createdSwarm = resolve => {
@@ -159,7 +159,7 @@ class Server extends EventEmitter {
     return new Promise(createdSwarm)
   }
 
-  getSwarm(infoHash) {
+  async getSwarm(infoHash) {
     if (Buffer.isBuffer(infoHash)) infoHash = infoHash.toString('hex')
 
     const gotSwarm = resolve => {
@@ -172,24 +172,11 @@ class Server extends EventEmitter {
   }
 
   // Get existing swarm, or create one if one does not exist  
-  getOrCreateSwarm(params) {
-    const gotOrCreatedSwarm = resolve => {
-      const gotSwarm = swarm => {
-        if (swarm) return resolve(swarm)
+  async getOrCreateSwarm(params) {
+    const swarm = await this.getSwarm(params.info_hash)
+                || await this.createSwarm(params.info_hash)
 
-        this.createSwarm(params.info_hash)
-          .then(
-            (swarm) => {
-              resolve(swarm)
-            })
-      }
-
-
-      return this.getSwarm(params.info_hash)
-        .then(gotSwarm)
-    }
-
-    return new Promise(gotOrCreatedSwarm)
+    return swarm
   }
 
   _onRequest (params, cb) {
