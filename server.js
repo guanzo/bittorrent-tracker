@@ -146,13 +146,17 @@ class Server extends EventEmitter {
     if (cb) cb(null);
   }
 
-  createSwarm (infoHash, cb) {
+  createSwarm(infoHash) {
     if (Buffer.isBuffer(infoHash)) infoHash = infoHash.toString('hex')
 
-    process.nextTick(() => {
-      const swarm = this.torrents[infoHash] = new Server.Swarm(infoHash, this)
-      cb(null, swarm)
-    })
+    const createdSwarm = resolve => {
+      process.nextTick(() => {
+        const swarm = this.torrents[infoHash] = new Server.Swarm(infoHash, this)
+        resolve(swarm)
+      })
+    }
+
+    return new Promise(createdSwarm)
   }
 
   getSwarm(infoHash) {
@@ -167,20 +171,21 @@ class Server extends EventEmitter {
     return new Promise(gotSwarm)
   }
 
-  // Get existing swarm, or create one if one does not exist
+  // Get existing swarm, or create one if one does not exist  
   getOrCreateSwarm(params) {
     const gotOrCreatedSwarm = resolve => {
       const gotSwarm = swarm => {
         if (swarm) return resolve(swarm)
 
-        this.createSwarm(params.info_hash, (err, swarm) => {
-          if (err) return resolve(err)
-          resolve(swarm)
-        })
+        this.createSwarm(params.info_hash)
+          .then(
+            (swarm) => {
+              resolve(swarm)
+            })
       }
 
 
-      this.getSwarm(params.info_hash)
+      return this.getSwarm(params.info_hash)
         .then(gotSwarm)
     }
 
