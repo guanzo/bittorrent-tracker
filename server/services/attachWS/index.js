@@ -120,25 +120,36 @@ function setupWebSocketServer (server) {
         debug('got %s offers from %s', params.offers.length, params.peer_id)
         debug('got %s peers from swarm %s', peers.length, params.info_hash)
 
-        peers.forEach((peer, i) => {
-          const { sdp } = (params.offers && params.offers[i] && params.offers[i].offer) || {}
-          const isTrickleSdp = SDP_TRICKLE_REGEX.test(sdp)
-          if (isTrickleSdp) {
-            swarm.offers.set(params.offers[i].offer_id, peer.peerId)
-          }
+        server.getSwarm(params.info_hash)
+          .then(
+            (swarm) => {
+              if (this.destroyed) return
+              if (!swarm) {
+                return this.emit('warning', new Error('no swarm with that `info_hash`'))
+              }
 
-          peer.socket.send(
-            JSON.stringify({
-              action: 'announce',
-              offer: params.offers[i].offer,
-              offer_id: params.offers[i].offer_id,
-              peer_id: common.hexToBinary(params.peer_id),
-              info_hash: common.hexToBinary(params.info_hash)
-            }),
-            peer.socket.onSend
+              peers.forEach((peer, i) => {
+                const { sdp } = (params.offers && params.offers[i] && params.offers[i].offer) || {}
+                const isTrickleSdp = SDP_TRICKLE_REGEX.test(sdp)
+                if (isTrickleSdp) {
+                  swarm.offers.set(params.offers[i].offer_id, peer.peerId)
+                }
+
+                peer.socket.send(
+                  JSON.stringify({
+                    action: 'announce',
+                    offer: params.offers[i].offer,
+                    offer_id: params.offers[i].offer_id,
+                    peer_id: common.hexToBinary(params.peer_id),
+                    info_hash: common.hexToBinary(params.info_hash)
+                  }),
+                  peer.socket.onSend
+                )
+                debug('sent offer to %s from %s', peer.peerId, params.peer_id)
+              })
+            }
           )
-          debug('sent offer to %s from %s', peer.peerId, params.peer_id)
-        })
+          .catch(err => server.emit('warning', err))
       }
 
       const done = () => {
@@ -155,10 +166,6 @@ function setupWebSocketServer (server) {
           params.peer_id
         )
 
-        server.getSwarm(params.info_hash)
-          .then(gotSwarm)
-          .catch(err => server.emit('warning', err))
-
         const gotSwarm = swarm => {
           if (server.destroyed) return
           if (!swarm) {
@@ -167,6 +174,7 @@ function setupWebSocketServer (server) {
               new Error('no swarm with that `info_hash`')
             )
           }
+
           // Mark the destination peer as recently used in cache
           const toPeer = swarm.peers.get(params.to_peer_id)
           if (!toPeer) {
@@ -190,6 +198,10 @@ function setupWebSocketServer (server) {
 
           done()
         }
+
+        server.getSwarm(params.info_hash)
+          .then(gotSwarm)
+          .catch(err => server.emit('warning', err))
       } else {
         done()
       }
