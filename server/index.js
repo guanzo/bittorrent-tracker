@@ -143,7 +143,8 @@ class Server extends EventEmitter {
       this.ws
     ].forEach(closeService)
 
-    if (cb) cb(null);
+    if (this.http) this.http.close(cb)
+    else cb(null)
   }
 
   async createSwarm(infoHash) {
