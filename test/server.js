@@ -175,10 +175,6 @@ test('http ipv6 server', function (t) {
   serverTest(t, 'http', 'inet6')
 })
 
-test('udp server', function (t) {
-  serverTest(t, 'udp', 'inet')
-})
-
 test('ws server', function (t) {
   serverTest(t, 'ws', 'inet')
 })

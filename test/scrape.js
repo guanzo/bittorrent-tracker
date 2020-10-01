@@ -43,10 +43,6 @@ test('http: single info_hash scrape', function (t) {
   testSingle(t, 'http')
 })
 
-test('udp: single info_hash scrape', function (t) {
-  testSingle(t, 'udp')
-})
-
 test('ws: single info_hash scrape', function (t) {
   testSingle(t, 'ws')
 })
@@ -76,10 +72,6 @@ test('http: scrape using Client.scrape static method', function (t) {
   clientScrapeStatic(t, 'http')
 })
 
-test('udp: scrape using Client.scrape static method', function (t) {
-  clientScrapeStatic(t, 'udp')
-})
-
 test('ws: scrape using Client.scrape static method', function (t) {
   clientScrapeStatic(t, 'ws')
 })
@@ -102,10 +94,6 @@ function clientScrapeStaticInvalid (t, serverType) {
 
 test('http: scrape using Client.scrape static method (invalid url)', function (t) {
   clientScrapeStaticInvalid(t, 'http')
-})
-
-test('udp: scrape using Client.scrape static method (invalid url)', function (t) {
-  clientScrapeStaticInvalid(t, 'udp')
 })
 
 test('ws: scrape using Client.scrape static method (invalid url)', function (t) {
@@ -144,10 +132,6 @@ function clientScrapeMulti (t, serverType) {
 
 test('http: MULTI scrape using Client.scrape static method', function (t) {
   clientScrapeMulti(t, 'http')
-})
-
-test('udp: MULTI scrape using Client.scrape static method', function (t) {
-  clientScrapeMulti(t, 'udp')
 })
 
 test('server: multiple info_hash scrape (manual http request)', function (t) {

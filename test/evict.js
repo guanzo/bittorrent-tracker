@@ -109,10 +109,6 @@ test('evict: http ipv6 server', function (t) {
   serverTest(t, 'http', 'inet6')
 })
 
-test('evict: udp server', function (t) {
-  serverTest(t, 'udp', 'inet')
-})
-
 test('evict: ws server', function (t) {
   serverTest(t, 'ws', 'inet')
 })

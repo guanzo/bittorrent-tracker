@@ -46,10 +46,6 @@ test('http: client.start()', function (t) {
   testClientStart(t, 'http')
 })
 
-test('udp: client.start()', function (t) {
-  testClientStart(t, 'udp')
-})
-
 test('ws: client.start()', function (t) {
   testClientStart(t, 'ws')
 })
@@ -92,10 +88,6 @@ function testClientStop (t, serverType) {
 
 test('http: client.stop()', function (t) {
   testClientStop(t, 'http')
-})
-
-test('udp: client.stop()', function (t) {
-  testClientStop(t, 'udp')
 })
 
 test('ws: client.stop()', function (t) {
@@ -148,10 +140,6 @@ test('http: client.stop(); client.destroy()', function (t) {
   testClientStopDestroy(t, 'http')
 })
 
-test('udp: client.stop(); client.destroy()', function (t) {
-  testClientStopDestroy(t, 'udp')
-})
-
 test('ws: client.stop(); client.destroy()', function (t) {
   testClientStopDestroy(t, 'ws')
 })
@@ -201,10 +189,6 @@ test('http: client.update()', function (t) {
   testClientUpdate(t, 'http')
 })
 
-test('udp: client.update()', function (t) {
-  testClientUpdate(t, 'udp')
-})
-
 test('ws: client.update()', function (t) {
   testClientUpdate(t, 'ws')
 })
@@ -241,10 +225,6 @@ function testClientScrape (t, serverType) {
 
 test('http: client.scrape()', function (t) {
   testClientScrape(t, 'http')
-})
-
-test('udp: client.scrape()', function (t) {
-  testClientScrape(t, 'udp')
 })
 
 test('ws: client.scrape()', function (t) {
@@ -432,10 +412,6 @@ test('http: client announce with numwant', function (t) {
   testClientAnnounceWithNumWant(t, 'http')
 })
 
-test('udp: client announce with numwant', function (t) {
-  testClientAnnounceWithNumWant(t, 'udp')
-})
-
 test('http: userAgent', function (t) {
   t.plan(2)
 
@@ -499,10 +475,6 @@ test('http: valid tracker port', function (t) {
   testSupportedTracker(t, 'http')
 })
 
-test('udp: valid tracker port', function (t) {
-  testSupportedTracker(t, 'udp')
-})
-
 test('ws: valid tracker port', function (t) {
   testSupportedTracker(t, 'ws')
 })
@@ -532,10 +504,6 @@ test('unsupported tracker protocol', function (t) {
 
 test('http: invalid tracker port', function (t) {
   testUnsupportedTracker(t, 'http://127.0.0.1:69691337/announce')
-})
-
-test('udp: invalid tracker port', function (t) {
-  testUnsupportedTracker(t, 'udp://127.0.0.1:69691337')
 })
 
 test('ws: invalid tracker port', function (t) {

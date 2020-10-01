@@ -4,7 +4,6 @@ const series = require('run-series')
 const string2compact = require('string2compact')
 
 const attachHttpService = require('./services/attachHttp')
-const attachUdpService = require('./services/attachUdp')
 const attachWSService = require('./services/attachWS')
 const setupStatsRoute = require('./services/statsRoute')
 const common = require('../lib/common')
@@ -39,8 +38,6 @@ class Server extends EventEmitter {
     this.torrents = {};
 
     this.http = null;
-    this.udp4 = null;
-    this.udp6 = null;
     this.ws = null;
 
     debug("new server %s", JSON.stringify(opts));
@@ -61,10 +58,10 @@ class Server extends EventEmitter {
 
     if (opts.http !== false) attachHttpService(this, onListening);
     if (opts.ws !== false) attachWSService(this, onListening);
-    if (opts.udp !== false) attachUdpService(this, onListening);
     if (opts.stats !== false) setupStatsRoute(this, onListening);
 
-    let num = !!this.http + !!this.udp4 + !!this.udp6
+    // TODO: UGH
+    let num = !!this.http
     this.num = num
 
     const self = this
@@ -75,16 +72,6 @@ class Server extends EventEmitter {
         debug('listening')
         self.emit('listening')
       }
-    }
-  }
-
-  onListening() {
-    this.num -= 1
-
-    if (this.num === 0) {
-      this.listening = true
-      debug('listening')
-      this.emit('listening')
     }
   }
 
@@ -109,17 +96,12 @@ class Server extends EventEmitter {
     }
 
     const httpPort = isObject(port) ? (port.http || 0) : port
-    const udpPort = isObject(port) ? (port.udp || 0) : port
 
     // binding to :: only receives IPv4 connections if the bindv6only sysctl is set 0,
     // which is the default on many operating systems
     const httpHostname = isObject(hostname) ? hostname.http : hostname
-    const udp4Hostname = isObject(hostname) ? hostname.udp : hostname
-    const udp6Hostname = isObject(hostname) ? hostname.udp6 : hostname
 
     if (this.http) this.http.listen(httpPort, httpHostname)
-    if (this.udp4) this.udp4.bind(udpPort, udp4Hostname)
-    if (this.udp6) this.udp6.bind(udpPort, udp6Hostname)
   }
 
   close(cb) {
@@ -138,10 +120,7 @@ class Server extends EventEmitter {
       }
     }
 
-    [ this.udp4,
-      this.udp6,
-      this.ws
-    ].forEach(closeService)
+    closeService(this.ws)
 
     if (this.http) this.http.close(cb)
     else cb(null)

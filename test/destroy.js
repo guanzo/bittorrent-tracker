@@ -41,10 +41,6 @@ test('http: no "update" events after destroy()', function (t) {
   testNoEventsAfterDestroy(t, 'http')
 })
 
-test('udp: no "update" events after destroy()', function (t) {
-  testNoEventsAfterDestroy(t, 'udp')
-})
-
 test('ws: no "update" events after destroy()', function (t) {
   testNoEventsAfterDestroy(t, 'ws')
 })

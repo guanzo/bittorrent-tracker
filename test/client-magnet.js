@@ -57,10 +57,6 @@ test('http: magnet: client.start/update/stop()', function (t) {
   testMagnet(t, 'http')
 })
 
-test('udp: magnet: client.start/update/stop()', function (t) {
-  testMagnet(t, 'udp')
-})
-
 test('ws: magnet: client.start/update/stop()', function (t) {
   testMagnet(t, 'ws')
 })

@@ -6,7 +6,6 @@ const Peer = require('simple-peer')
 
 const common = require('../lib/common')
 const HTTPTracker = require('./http-tracker') // empty object in browser
-const UDPTracker = require('./udp-tracker') // empty object in browser
 const WebSocketTracker = require('./websocket-tracker')
 
 /**
@@ -102,8 +101,6 @@ class Client extends EventEmitter {
         if ((protocol === 'http:' || protocol === 'https:') &&
             typeof HTTPTracker === 'function') {
           return new HTTPTracker(this, announceUrl)
-        } else if (protocol === 'udp:' && typeof UDPTracker === 'function') {
-          return new UDPTracker(this, announceUrl)
         } else if ((protocol === 'ws:' || protocol === 'wss:') && webrtcSupport) {
           // Skip ws:// trackers on https:// sites because they throw SecurityError
           if (protocol === 'ws:' && typeof window !== 'undefined' &&

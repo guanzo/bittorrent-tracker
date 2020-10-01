@@ -54,10 +54,6 @@ test('http: large torrent: client.start()', function (t) {
   testLargeTorrent(t, 'http')
 })
 
-test('udp: large torrent: client.start()', function (t) {
-  testLargeTorrent(t, 'udp')
-})
-
 test('ws: large torrent: client.start()', function (t) {
   testLargeTorrent(t, 'ws')
 })
