@@ -2,23 +2,23 @@ const attachHttpServer = require('../attachHttp')
 const getStats = require('./getStats')
 const printClients = require('./printClients')
 
-function setupStatsRoute(server, onListening) {
-    if (!server.http) attachHttpServer(server, onListening);
+function setupStatsRoute (server, onListening) {
+  if (!server.http) attachHttpServer(server, onListening)
 
-    // Http handler for '/stats' route
-    server.http.on('request', (req, res) => {    
-        if (res.headersSent) return
+  // Http handler for '/stats' route
+  server.http.on('request', (req, res) => {
+    if (res.headersSent) return
 
-        if (req.method === 'GET' && (req.url === '/stats' || req.url === '/stats.json')) {
-            const stats = getStats(server)
-            if (req.url === '/stats.json' || req.headers.accept === 'application/json') {
-                res.setHeader('Content-Type', 'application/json')
-                res.end(JSON.stringify(stats))
-            } else if (req.url === '/stats') {
-                const printout = printClients(stats.clients)
+    if (req.method === 'GET' && (req.url === '/stats' || req.url === '/stats.json')) {
+      const stats = getStats(server)
+      if (req.url === '/stats.json' || req.headers.accept === 'application/json') {
+        res.setHeader('Content-Type', 'application/json')
+        res.end(JSON.stringify(stats))
+      } else if (req.url === '/stats') {
+        const printout = printClients(stats.clients)
 
-                res.setHeader('Content-Type', 'text/html')
-                res.end(`
+        res.setHeader('Content-Type', 'text/html')
+        res.end(`
                     <h1>${stats.torrents} torrents (${stats.activeTorrents} active)</h1>
                     <h2>Connected Peers: ${stats.peersAll}</h2>
                     <h3>Peers Seeding Only: ${stats.peersSeederOnly}</h3>
@@ -29,9 +29,9 @@ function setupStatsRoute(server, onListening) {
                     <h3>Clients:</h3>
                     ${printout}
                 `.replace(/^\s+/gm, '')) // trim left
-            }
-        }
-    })
+      }
+    }
+  })
 }
 
 module.exports = setupStatsRoute

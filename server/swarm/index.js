@@ -17,7 +17,7 @@ class Swarm {
       maxAge: server.peersCacheTtl || 20 * 60 * 1000 // 20 minutes
     })
 
-    // maps offer_id to peer_id so that trickling candidates
+    // maps offerId to peer_id so that trickling candidates
     // can be sent to the correct peer
     self.offers = new LRU({
       max: 2000,
@@ -39,14 +39,14 @@ class Swarm {
     })
   }
 
-  announce(params, cb) {
+  announce (params, cb) {
     const onAnnounce = resolve => {
       this._announce(params, cb)
     }
 
-    return new Promise(onAnnounce)  
-    }
-  
+    return new Promise(onAnnounce)
+  }
+
   _announce (params, cb) {
     var self = this
     var id = params.type === 'ws' ? params.peer_id : params.addr
@@ -151,17 +151,17 @@ class Swarm {
   }
 
   _getPeersByOfferId (params, ownPeerId) {
-      const peers = []
-      const { offer_id } = params.offers[0]
-      const peerId = this.offers.get(offer_id)
-      const peer = this.peers.peek(peerId)
-      if (peer) {
-          peers.push(peer)
-      }
-      return peers
+    const peers = []
+    const { offerId } = params.offers[0]
+    const peerId = this.offers.get(offerId)
+    const peer = this.peers.peek(peerId)
+    if (peer) {
+      peers.push(peer)
+    }
+    return peers
   }
 
-  _getPeers(numwant, ownPeerId, isWebRTC) {
+  _getPeers (numwant, ownPeerId, isWebRTC) {
     var peers = []
     var ite = randomIterate(this.peers.keys)
     var peerId
@@ -177,4 +177,4 @@ class Swarm {
   }
 }
 
-module.exports = Swarm;
+module.exports = Swarm

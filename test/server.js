@@ -162,7 +162,7 @@ function serverTest (t, serverType, serverFamily) {
       }
 
       server.getSwarm(infoHash)
-            .then(gotSwarm)
+        .then(gotSwarm)
     })
   })
 }

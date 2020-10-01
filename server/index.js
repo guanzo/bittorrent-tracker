@@ -28,37 +28,37 @@ const Swarm = require('./swarm')
 const TEN_MINUTES = 10 * 60 * 1000
 
 class Server extends EventEmitter {
-  constructor(opts = {}) {
-    super();
+  constructor (opts = {}) {
+    super()
 
-    this._listenCalled = false;
-    this.listening = false;
+    this._listenCalled = false
+    this.listening = false
     this.numListeners = 0
-    this.destroyed = false;
-    this.torrents = {};
+    this.destroyed = false
+    this.torrents = {}
 
-    this.http = null;
-    this.ws = null;
+    this.http = null
+    this.ws = null
 
-    debug("new server %s", JSON.stringify(opts));
+    debug('new server %s', JSON.stringify(opts))
 
     const {
       interval,
       trustProxy,
       filter,
       peersCacheLength,
-      peersCacheTtl,
-    } = opts;
+      peersCacheTtl
+    } = opts
 
-    this.intervalMs = interval || TEN_MINUTES;
-    this._trustProxy = Boolean(trustProxy);
-    this._filter = filter;
-    this.peersCacheLength = peersCacheLength;
-    this.peersCacheTtl = peersCacheTtl;
+    this.intervalMs = interval || TEN_MINUTES
+    this._trustProxy = Boolean(trustProxy)
+    this._filter = filter
+    this.peersCacheLength = peersCacheLength
+    this.peersCacheTtl = peersCacheTtl
 
-    if (opts.http !== false) attachHttpService(this, onListening);
-    if (opts.ws !== false) attachWSService(this, onListening);
-    if (opts.stats !== false) setupStatsRoute(this, onListening);
+    if (opts.http !== false) attachHttpService(this, onListening)
+    if (opts.ws !== false) attachWSService(this, onListening)
+    if (opts.stats !== false) setupStatsRoute(this, onListening)
 
     // TODO: UGH
     let num = !!this.http
@@ -104,18 +104,18 @@ class Server extends EventEmitter {
     if (this.http) this.http.listen(httpPort, httpHostname)
   }
 
-  close(cb) {
-    debug("close");
+  close (cb) {
+    debug('close')
 
-    this.listening = false;
-    this.destroyed = true;
+    this.listening = false
+    this.destroyed = true
 
     const closeService = service => {
       if (service) {
         try {
-          service.close();
+          service.close()
         } catch (err) {
-          this.onError(err);
+          this.onError(err)
         }
       }
     }
@@ -126,7 +126,7 @@ class Server extends EventEmitter {
     else cb(null)
   }
 
-  async createSwarm(infoHash) {
+  async createSwarm (infoHash) {
     if (Buffer.isBuffer(infoHash)) infoHash = infoHash.toString('hex')
 
     const createdSwarm = resolve => {
@@ -139,7 +139,7 @@ class Server extends EventEmitter {
     return new Promise(createdSwarm)
   }
 
-  async getSwarm(infoHash) {
+  async getSwarm (infoHash) {
     if (Buffer.isBuffer(infoHash)) infoHash = infoHash.toString('hex')
 
     const gotSwarm = resolve => {
@@ -151,10 +151,10 @@ class Server extends EventEmitter {
     return new Promise(gotSwarm)
   }
 
-  // Get existing swarm, or create one if one does not exist  
-  async getOrCreateSwarm(params) {
-    const swarm = await this.getSwarm(params.info_hash)
-                || await this.createSwarm(params.info_hash)
+  // Get existing swarm, or create one if one does not exist
+  async getOrCreateSwarm (params) {
+    const swarm = await this.getSwarm(params.info_hash) ||
+                await this.createSwarm(params.info_hash)
 
     return swarm
   }
@@ -182,7 +182,7 @@ class Server extends EventEmitter {
     const swarm = await this.getOrCreateSwarm(params)
 
     if (!params.event || params.event === 'empty') params.event = 'update'
-    
+
     const _onAnnounce = async (err, response) => {
       if (err) return cb(err)
 
@@ -193,20 +193,19 @@ class Server extends EventEmitter {
         const peers = response.peers
 
         // Find IPv4 peers
-        const peers4 =  peers
-                          .filter(peer => common.IPV4_RE.test(peer.ip))
-                          .map(peer => `${peer.ip}:${peer.port}`)
+        const peers4 = peers
+          .filter(peer => common.IPV4_RE.test(peer.ip))
+          .map(peer => `${peer.ip}:${peer.port}`)
 
         response.peers = string2compact(peers4)
 
         // Find IPv6 peers
         const peers6 = peers
-                            .filter(peer => common.IPV6_RE.test(peer.ip))
-                            .map(peer => `[${peer.ip}]:${peer.port}`)
+          .filter(peer => common.IPV6_RE.test(peer.ip))
+          .map(peer => `[${peer.ip}]:${peer.port}`)
 
         response.peer6 = string2compact(peers6)
-      } 
-      else if (params.compact === 0) {
+      } else if (params.compact === 0) {
         // IPv6 peers are not separate for non-compact responses
         const formatIPv6Peer =
                 peer => ({
@@ -215,15 +214,14 @@ class Server extends EventEmitter {
                   port: peer.port
                 })
 
-        response.peers = 
+        response.peers =
           response.peers.map(formatIPv6Peer)
-
       } // else, return full peer objects (used for websocket responses)
 
       cb(null, response)
     }
 
-    swarm.announce(params, _onAnnounce )
+    swarm.announce(params, _onAnnounce)
   }
 
   _onScrape (params, cb) {
@@ -282,7 +280,5 @@ function toNumber (x) {
   x = Number(x)
   return x >= 0 ? x : false
 }
-
-function noop () {}
 
 module.exports = Server

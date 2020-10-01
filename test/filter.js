@@ -2,7 +2,6 @@
 // WE AREN'T USING FILTERS YET, SO THIS HASN'T BEEN UPDATED.
 // It's likely a quick fix to get the artificial filtar working with the new Promise base API.
 
-
 // var Client = require('../')
 // var common = require('./common')
 // var fixtures = require('webtorrent-fixtures')
