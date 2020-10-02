@@ -16,9 +16,6 @@ const RECONNECT_MAXIMUM = 60 * 60 * 1000
 const RECONNECT_VARIANCE = 5 * 60 * 1000
 const OFFER_TIMEOUT = 50 * 1000
 
-// const TRICKLE_TIMEOUT = 10 * 1000
-// const SDP_TRICKLE_REGEX = /a=ice-options:trickle\s\n/
-
 class WebSocketTracker extends Tracker {
   constructor (client, announceUrl, opts) {
     super(client, announceUrl)

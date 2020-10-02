@@ -35,7 +35,7 @@ function attachHttpServer (server, onListening) {
       return
     }
 
-    server._onRequest(params, (err, response) => {
+    server.onRequest(params, (err, response) => {
       if (err) {
         server.emit('warning', err)
         response = {

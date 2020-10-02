@@ -71,7 +71,7 @@ function setupWebSocketServer (server) {
 
     if (!socket.peerId) socket.peerId = params.peer_id // as hex
 
-    server._onRequest(params, (err, response) => {
+    server.onRequest(params, (err, response) => {
       if (server.destroyed || socket.destroyed) return
       if (err) {
         socket.send(

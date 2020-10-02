@@ -159,7 +159,7 @@ class Server extends EventEmitter {
     return swarm
   }
 
-  _onRequest (params, cb) {
+  onRequest (params, cb) {
     if (params && params.action === common.ACTIONS.CONNECT) {
       cb(null, { action: common.ACTIONS.CONNECT })
     } else if (params && params.action === common.ACTIONS.ANNOUNCE) {
