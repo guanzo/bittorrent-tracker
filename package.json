@@ -43,6 +43,7 @@
   },
   "devDependencies": {
     "magnet-uri": "^5.2.4",
+    "standard": "^14.3.4",
     "tape": "^5.0.0",
     "tape-watch": "^2.3.0",
     "webtorrent-fixtures": "^1.7.3",
@@ -61,7 +62,8 @@
     "url": "https://github.com/webtorrent/bittorrent-tracker.git"
   },
   "scripts": {
+    "lint": "standard",
     "watch": "tape-watch test/*.js",
-    "test": "tape test/*.js"
+    "test": "standard :&& tape test/*.js"
   }
 }

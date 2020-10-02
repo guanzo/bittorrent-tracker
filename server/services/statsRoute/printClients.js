@@ -1,9 +1,14 @@
-const printVersionHtml = client => (html, version) => (
-  html + `<li><strong>${name}</strong> ${version} : ${client[version]}</li>\n`
-)
+const startHtml = '<ul>\n'
+const endHtml = '</ul>'
 
-function printClient (html, client) {
-  const printClientHtml = printVersionHtml(client)
+function printClient (html, entry) {
+  const [name, client] = entry
+
+  const printClientHtml =
+    (html, version) => (
+      html + `<li><strong>${name}</strong> ${version} : ${client[version]}</li>\n`
+    )
+
   const clientHtml =
             Object.values(client).reduce(printClientHtml, html)
 
@@ -11,9 +16,8 @@ function printClient (html, client) {
 };
 
 function printClients (clients) {
-  const initialHtml = '<ul>\n'
-  const contentHtml = Object.values(clients).reduce(printClient, initialHtml)
-  const html = contentHtml + '</ul>'
+  const contentHtml = Object.entries(clients).reduce(printClient)
+  const html = startHtml + contentHtml + endHtml
 
   return html
 }
