@@ -16,7 +16,7 @@ function printClient (html, entry) {
 };
 
 function printClients (clients) {
-  const contentHtml = Object.entries(clients).reduce(printClient)
+  const contentHtml = Object.entries(clients).reduce(printClient, '')
   const html = startHtml + contentHtml + endHtml
 
   return html
