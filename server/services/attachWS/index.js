@@ -51,7 +51,7 @@ function setupWebSocketServer (server) {
     socket.onCloseBound = () => onWebSocketClose(socket)
     socket.on('close', socket.onCloseBound)
   }
-
+  server.onWebSocketConnection = onWebSocketConnection
   const onWebSocketRequest = (socket, opts, params) => {
     try {
       params = parseWebSocketRequest(socket, opts, params)
@@ -266,7 +266,7 @@ function setupWebSocketServer (server) {
     // Note: socket.upgradeReq was removed in ws@3.0.0, so re-add it.
     // https://github.com/websockets/ws/pull/1099
     socket.upgradeReq = req
-    onWebSocketConnection(socket)
+    server.onWebSocketConnection(socket)
   }
 
   ws.address = () => server.http.address()

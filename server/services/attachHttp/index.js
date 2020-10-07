@@ -15,6 +15,7 @@ function attachHttpServer (server, onListening) {
   httpServer.on('listening', onListening)
 
   const onHttpRequest = (req, res, opts = {}) => {
+    if (res.headersSent) return
     opts.trustProxy = opts.trustProxy || server._trustProxy
 
     let params
@@ -53,12 +54,8 @@ function attachHttpServer (server, onListening) {
     })
   }
 
-  const onRequest = (req, res) => {
-    if (res.headersSent) return
-    if (onHttpRequest) onHttpRequest(req, res)
-  }
-
-  const setRequest = () => httpServer.on('request', onRequest)
+  server.onHttpRequest = onHttpRequest
+  const setRequest = () => httpServer.on('request', (...args) => server.onHttpRequest(...args))
 
   // Add default http request handler on next tick to give user the chance to add
   // their own handler first. Handle requests untouched by user's handler.
