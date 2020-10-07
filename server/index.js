@@ -25,7 +25,12 @@ const Swarm = require('./swarm')
  * @param {boolean} opts.stats      enable web-based statistics? (default: true)
  * @param {function} opts.filter    black/whitelist fn for disallowing/allowing torrents
  */
-const TEN_MINUTES = 10 * 60 * 1000
+
+// NOTE: Interval gets divided by 5 for websocket trackers,
+// so multiply the intended interval by 5const TEN_MINUTES = 10 * 60 * 1000
+// Original default was 10 minutes
+const MINUTE = 1000 * 60
+const defaultInterval = MINUTE * 15 * 5 // Client announce interval, in milliseconds.
 
 class Server extends EventEmitter {
   constructor (opts = {}) {
@@ -50,7 +55,7 @@ class Server extends EventEmitter {
       peersCacheTtl
     } = opts
 
-    this.intervalMs = interval || TEN_MINUTES
+    this.intervalMs = interval || defaultInterval
     this._trustProxy = Boolean(trustProxy)
     this._filter = filter
     this.peersCacheLength = peersCacheLength
