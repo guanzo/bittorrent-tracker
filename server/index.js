@@ -175,8 +175,8 @@ class Server extends EventEmitter {
     const self = this
 
     if (this._filter) {
-      const { allowed, info } = await this._filter(params.info_hash, params)
-      if (!allowed) return info
+      const notAllowed = await this._filter(params.info_hash, params)
+      if (notAllowed) return notAllowed
     }
 
     const swarm = await this.getOrCreateSwarm(params)
