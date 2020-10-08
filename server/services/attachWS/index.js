@@ -52,6 +52,7 @@ function setupWebSocketServer (server) {
     socket.on('close', socket.onCloseBound)
   }
   server.onWebSocketConnection = onWebSocketConnection
+  
   const onWebSocketRequest = (socket, opts, params) => {
     try {
       params = parseWebSocketRequest(socket, opts, params)
@@ -207,10 +208,12 @@ function setupWebSocketServer (server) {
       }
     })
   }
-
+  server.onWebSocketRequest = onWebSocketRequest
+  
   const onWebSocketSend = (socket, err) => {
     if (err) onWebSocketError(socket, err)
   }
+  server.onWebSocketSend = onWebSocketSend
 
   const onWebSocketClose = (socket) => {
     debug('websocket close %s', socket.peerId)
@@ -227,15 +230,15 @@ function setupWebSocketServer (server) {
               numwant: 0,
               peer_id: socket.peerId
             },
-            noop
+            () => {}
           )
         }
       })
     }
 
     // ignore all future errors
-    socket.onSend = noop
-    socket.on('error', noop)
+    socket.onSend = () => {}
+    socket.on('error', () => {})
 
     socket.peerId = null
     socket.infoHashes = null
@@ -255,12 +258,14 @@ function setupWebSocketServer (server) {
     }
     socket.onCloseBound = null
   }
+  server.onWebSocketClose = onWebSocketClose
 
   const onWebSocketError = (socket, err) => {
     debug('websocket error %s', err.message || err)
     server.emit('warning', err)
     onWebSocketClose(socket)
   }
+  server.onWebSocketError = onWebSocketError
 
   const onConnection = (socket, req) => {
     // Note: socket.upgradeReq was removed in ws@3.0.0, so re-add it.
@@ -282,5 +287,3 @@ function createWebSocketServer (server, onListening) {
 }
 
 module.exports = createWebSocketServer
-
-function noop () { }
