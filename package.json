@@ -1,7 +1,7 @@
 {
   "name": "arcio-tracker",
   "description": "arcui tracker (client & server) implementation",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": {
     "name": "Arcio",
     "email": "team@arc.io"
