@@ -1,15 +1,22 @@
+const debug = require('debug')('bittorrent-tracker:server')
+
 const http = require('http')
 const bencode = require('bencode')
 
 const common = require('../../../lib/common')
 const parseHttpRequest = require('./parseHttpRequest')
 
-function attachHttpServer (server, onListening) {
-  const {
-    onError
-  } = server
-
+function attachHttpServer (server) {
   const httpServer = http.createServer()
+
+  const onListening = () => {
+    server.listening = true
+    debug('listening')
+    server.emit('listening')
+  }
+
+  const onError = (...args) => { server.onError(...args)}
+
 
   httpServer.on('error', onError)
   httpServer.on('listening', onListening)

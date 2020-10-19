@@ -61,23 +61,9 @@ class Server extends EventEmitter {
     this.peersCacheLength = peersCacheLength
     this.peersCacheTtl = peersCacheTtl
 
-    if (opts.http !== false) attachHttpService(this, onListening)
-    if (opts.ws !== false) attachWSService(this, onListening)
-    if (opts.stats !== false) setupStatsRoute(this, onListening)
-
-    // TODO: UGH
-    let num = !!this.http
-    this.num = num
-
-    const self = this
-    function onListening () {
-      num -= 1
-      if (num === 0) {
-        self.listening = true
-        debug('listening')
-        self.emit('listening')
-      }
-    }
+    if (opts.http !== false) attachHttpService(this)
+    if (opts.ws !== false) attachWSService(this)
+    if (opts.stats !== false) setupStatsRoute(this)
   }
 
   onError (err) {
