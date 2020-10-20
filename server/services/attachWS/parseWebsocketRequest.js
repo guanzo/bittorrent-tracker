@@ -1,6 +1,6 @@
 module.exports = parseWebSocketRequest
 
-var common = require('../common')
+const common = require('../../../lib/common')
 
 function parseWebSocketRequest (socket, opts, params) {
   if (!opts) opts = {}

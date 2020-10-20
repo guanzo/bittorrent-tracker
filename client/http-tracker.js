@@ -4,7 +4,7 @@ const compact2string = require('compact2string')
 const debug = require('debug')('bittorrent-tracker:http-tracker')
 const get = require('simple-get')
 
-const common = require('../common')
+const common = require('../lib/common')
 const Tracker = require('./tracker')
 
 const HTTP_SCRAPE_SUPPORT = /\/(announce)[^/]*$/

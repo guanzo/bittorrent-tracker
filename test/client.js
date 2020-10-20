@@ -1,22 +1,22 @@
-var Client = require('../')
-var common = require('./common')
-var fixtures = require('webtorrent-fixtures')
-var test = require('tape')
+const Client = require('../')
+const common = require('./common')
+const fixtures = require('webtorrent-fixtures')
+const test = require('tape')
 
-var peerId1 = Buffer.from('01234567890123456789')
-var peerId2 = Buffer.from('12345678901234567890')
-var peerId3 = Buffer.from('23456789012345678901')
-var port = 6881
+const peerId1 = Buffer.from('01234567890123456789')
+const peerId2 = Buffer.from('12345678901234567890')
+const peerId3 = Buffer.from('23456789012345678901')
+const port = 6881
 
 function testClientStart (t, serverType) {
   t.plan(4)
 
   common.createServer(t, serverType, function (server, announceUrl) {
-    var client = new Client({
+    const client = new Client({
       infoHash: fixtures.leaves.parsedTorrent.infoHash,
       announce: announceUrl,
       peerId: peerId1,
-      port: port,
+      port,
       wrtc: {}
     })
 
@@ -46,10 +46,6 @@ test('http: client.start()', function (t) {
   testClientStart(t, 'http')
 })
 
-test('udp: client.start()', function (t) {
-  testClientStart(t, 'udp')
-})
-
 test('ws: client.start()', function (t) {
   testClientStart(t, 'ws')
 })
@@ -58,11 +54,11 @@ function testClientStop (t, serverType) {
   t.plan(4)
 
   common.createServer(t, serverType, function (server, announceUrl) {
-    var client = new Client({
+    const client = new Client({
       infoHash: fixtures.leaves.parsedTorrent.infoHash,
       announce: announceUrl,
       peerId: peerId1,
-      port: port,
+      port,
       wrtc: {}
     })
 
@@ -94,10 +90,6 @@ test('http: client.stop()', function (t) {
   testClientStop(t, 'http')
 })
 
-test('udp: client.stop()', function (t) {
-  testClientStop(t, 'udp')
-})
-
 test('ws: client.stop()', function (t) {
   testClientStop(t, 'ws')
 })
@@ -106,11 +98,11 @@ function testClientStopDestroy (t, serverType) {
   t.plan(2)
 
   common.createServer(t, serverType, function (server, announceUrl) {
-    var client = new Client({
+    const client = new Client({
       infoHash: fixtures.leaves.parsedTorrent.infoHash,
       announce: announceUrl,
       peerId: peerId1,
-      port: port,
+      port,
       wrtc: {}
     })
 
@@ -148,10 +140,6 @@ test('http: client.stop(); client.destroy()', function (t) {
   testClientStopDestroy(t, 'http')
 })
 
-test('udp: client.stop(); client.destroy()', function (t) {
-  testClientStopDestroy(t, 'udp')
-})
-
 test('ws: client.stop(); client.destroy()', function (t) {
   testClientStopDestroy(t, 'ws')
 })
@@ -160,11 +148,11 @@ function testClientUpdate (t, serverType) {
   t.plan(4)
 
   common.createServer(t, serverType, function (server, announceUrl) {
-    var client = new Client({
+    const client = new Client({
       infoHash: fixtures.leaves.parsedTorrent.infoHash,
       announce: announceUrl,
       peerId: peerId1,
-      port: port,
+      port,
       wrtc: {}
     })
 
@@ -201,10 +189,6 @@ test('http: client.update()', function (t) {
   testClientUpdate(t, 'http')
 })
 
-test('udp: client.update()', function (t) {
-  testClientUpdate(t, 'udp')
-})
-
 test('ws: client.update()', function (t) {
   testClientUpdate(t, 'ws')
 })
@@ -213,11 +197,11 @@ function testClientScrape (t, serverType) {
   t.plan(4)
 
   common.createServer(t, serverType, function (server, announceUrl) {
-    var client = new Client({
+    const client = new Client({
       infoHash: fixtures.leaves.parsedTorrent.infoHash,
       announce: announceUrl,
       peerId: peerId1,
-      port: port,
+      port,
       wrtc: {}
     })
 
@@ -243,10 +227,6 @@ test('http: client.scrape()', function (t) {
   testClientScrape(t, 'http')
 })
 
-test('udp: client.scrape()', function (t) {
-  testClientScrape(t, 'udp')
-})
-
 test('ws: client.scrape()', function (t) {
   testClientScrape(t, 'ws')
 })
@@ -255,11 +235,11 @@ function testClientAnnounceWithParams (t, serverType) {
   t.plan(5)
 
   common.createServer(t, serverType, function (server, announceUrl) {
-    var client = new Client({
+    const client = new Client({
       infoHash: fixtures.leaves.parsedTorrent.infoHash,
       announce: announceUrl,
       peerId: peerId1,
-      port: port,
+      port,
       wrtc: {}
     })
 
@@ -303,11 +283,11 @@ function testClientGetAnnounceOpts (t, serverType) {
   t.plan(5)
 
   common.createServer(t, serverType, function (server, announceUrl) {
-    var client = new Client({
+    const client = new Client({
       infoHash: fixtures.leaves.parsedTorrent.infoHash,
       announce: announceUrl,
       peerId: peerId1,
-      port: port,
+      port,
       getAnnounceOpts: function () {
         return {
           testParam: 'this is a test'
@@ -354,11 +334,11 @@ function testClientAnnounceWithNumWant (t, serverType) {
   t.plan(4)
 
   common.createServer(t, serverType, function (server, announceUrl) {
-    var client1 = new Client({
+    const client1 = new Client({
       infoHash: fixtures.leaves.parsedTorrent.infoHash,
       announce: [announceUrl],
       peerId: peerId1,
-      port: port,
+      port,
       wrtc: {}
     })
 
@@ -368,7 +348,7 @@ function testClientAnnounceWithNumWant (t, serverType) {
 
     client1.start()
     client1.once('update', function () {
-      var client2 = new Client({
+      const client2 = new Client({
         infoHash: fixtures.leaves.parsedTorrent.infoHash,
         announce: announceUrl,
         peerId: peerId2,
@@ -382,7 +362,7 @@ function testClientAnnounceWithNumWant (t, serverType) {
 
       client2.start()
       client2.once('update', function () {
-        var client3 = new Client({
+        const client3 = new Client({
           infoHash: fixtures.leaves.parsedTorrent.infoHash,
           announce: announceUrl,
           peerId: peerId3,
@@ -398,7 +378,7 @@ function testClientAnnounceWithNumWant (t, serverType) {
         client3.on('peer', function () {
           t.pass('got one peer (this should only fire once)')
 
-          var num = 3
+          let num = 3
           function tryCloseServer () {
             num -= 1
             if (num === 0) server.close()
@@ -432,10 +412,6 @@ test('http: client announce with numwant', function (t) {
   testClientAnnounceWithNumWant(t, 'http')
 })
 
-test('udp: client announce with numwant', function (t) {
-  testClientAnnounceWithNumWant(t, 'udp')
-})
-
 test('http: userAgent', function (t) {
   t.plan(2)
 
@@ -445,11 +421,11 @@ test('http: userAgent', function (t) {
       t.ok(req.headers['user-agent'].indexOf('WebTorrent') !== -1)
     })
 
-    var client = new Client({
+    const client = new Client({
       infoHash: fixtures.leaves.parsedTorrent.infoHash,
       announce: announceUrl,
       peerId: peerId1,
-      port: port,
+      port,
       userAgent: 'WebTorrent/0.98.0 (https://webtorrent.io)',
       wrtc: {}
     })
@@ -472,11 +448,11 @@ function testSupportedTracker (t, serverType) {
   t.plan(1)
 
   common.createServer(t, serverType, function (server, announceUrl) {
-    var client = new Client({
+    const client = new Client({
       infoHash: fixtures.leaves.parsedTorrent.infoHash,
       announce: announceUrl,
       peerId: peerId1,
-      port: port,
+      port,
       wrtc: {}
     })
 
@@ -499,10 +475,6 @@ test('http: valid tracker port', function (t) {
   testSupportedTracker(t, 'http')
 })
 
-test('udp: valid tracker port', function (t) {
-  testSupportedTracker(t, 'udp')
-})
-
 test('ws: valid tracker port', function (t) {
   testSupportedTracker(t, 'ws')
 })
@@ -510,11 +482,11 @@ test('ws: valid tracker port', function (t) {
 function testUnsupportedTracker (t, announceUrl) {
   t.plan(1)
 
-  var client = new Client({
+  const client = new Client({
     infoHash: fixtures.leaves.parsedTorrent.infoHash,
     announce: announceUrl,
     peerId: peerId1,
-    port: port,
+    port,
     wrtc: {}
   })
 
@@ -532,10 +504,6 @@ test('unsupported tracker protocol', function (t) {
 
 test('http: invalid tracker port', function (t) {
   testUnsupportedTracker(t, 'http://127.0.0.1:69691337/announce')
-})
-
-test('udp: invalid tracker port', function (t) {
-  testUnsupportedTracker(t, 'udp://127.0.0.1:69691337')
 })
 
 test('ws: invalid tracker port', function (t) {
