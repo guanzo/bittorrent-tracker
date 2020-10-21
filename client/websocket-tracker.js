@@ -3,7 +3,7 @@ const Peer = require('simple-peer')
 const randombytes = require('randombytes')
 const Socket = require('simple-websocket')
 
-const common = require('../common')
+const common = require('../lib/common')
 const Tracker = require('./tracker')
 
 // Use a socket pool, so tracker clients share WebSocket objects for the same server.
@@ -12,8 +12,8 @@ const Tracker = require('./tracker')
 const socketPool = {}
 
 const RECONNECT_MINIMUM = 10 * 1000
-const RECONNECT_MAXIMUM = 30 * 60 * 1000
-const RECONNECT_VARIANCE = 2 * 60 * 1000
+const RECONNECT_MAXIMUM = 60 * 60 * 1000
+const RECONNECT_VARIANCE = 5 * 60 * 1000
 const OFFER_TIMEOUT = 50 * 1000
 const TRICKLE_TIMEOUT = 10 * 1000
 
@@ -52,9 +52,9 @@ class WebSocketTracker extends Tracker {
       })
     }
     const baseParams = {
-        action: 'announce',
-        info_hash: this.client._infoHashBinary,
-        peer_id: this.client._peerIdBinary,
+      action: 'announce',
+      info_hash: this.client._infoHashBinary,
+      peer_id: this.client._peerIdBinary
     }
     const params = Object.assign({}, opts, baseParams)
     if (this._trackerId) params.trackerid = this._trackerId
@@ -320,7 +320,6 @@ class WebSocketTracker extends Tracker {
       if ((sdp || candidate) && peer && !peer.destroyed) {
         peer.signal(data.offer)
       }
-
     }
 
     if (data.answer && data.peer_id) {
@@ -329,7 +328,7 @@ class WebSocketTracker extends Tracker {
       if (peer) {
         peer.id = common.binaryToHex(data.peer_id)
         if (!peer.destroyed) {
-            peer.signal(data.answer)
+          peer.signal(data.answer)
         }
 
         clearTimeout(peer.trackerTimeout)
@@ -416,11 +415,13 @@ class WebSocketTracker extends Tracker {
   _generateOffers (numwant, cb) {
     const self = this
     const offers = []
+
     debug('generating %s offers', numwant)
 
     for (let i = 0; i < numwant; ++i) {
       generateOffer()
     }
+
     checkDone()
 
     function generateOffer () {

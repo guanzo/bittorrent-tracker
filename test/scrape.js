@@ -1,20 +1,20 @@
-var bencode = require('bencode')
-var Client = require('../')
-var common = require('./common')
-var commonLib = require('../lib/common')
-var commonTest = require('./common')
-var fixtures = require('webtorrent-fixtures')
-var get = require('simple-get')
-var test = require('tape')
+const bencode = require('bencode')
+const Client = require('../')
+const common = require('./common')
+const commonLib = require('../lib/common')
+const commonTest = require('./common')
+const fixtures = require('webtorrent-fixtures')
+const get = require('simple-get')
+const test = require('tape')
 
-var peerId = Buffer.from('01234567890123456789')
+const peerId = Buffer.from('01234567890123456789')
 
 function testSingle (t, serverType) {
   commonTest.createServer(t, serverType, function (server, announceUrl) {
-    var client = new Client({
+    const client = new Client({
       infoHash: fixtures.leaves.parsedTorrent.infoHash,
       announce: announceUrl,
-      peerId: peerId,
+      peerId,
       port: 6881,
       wrtc: {}
     })
@@ -43,17 +43,13 @@ test('http: single info_hash scrape', function (t) {
   testSingle(t, 'http')
 })
 
-test('udp: single info_hash scrape', function (t) {
-  testSingle(t, 'udp')
-})
-
 test('ws: single info_hash scrape', function (t) {
   testSingle(t, 'ws')
 })
 
 function clientScrapeStatic (t, serverType) {
   commonTest.createServer(t, serverType, function (server, announceUrl) {
-    var client = Client.scrape({
+    const client = Client.scrape({
       announce: announceUrl,
       infoHash: fixtures.leaves.parsedTorrent.infoHash,
       wrtc: {}
@@ -76,20 +72,16 @@ test('http: scrape using Client.scrape static method', function (t) {
   clientScrapeStatic(t, 'http')
 })
 
-test('udp: scrape using Client.scrape static method', function (t) {
-  clientScrapeStatic(t, 'udp')
-})
-
 test('ws: scrape using Client.scrape static method', function (t) {
   clientScrapeStatic(t, 'ws')
 })
 
 // Ensure the callback function gets called when an invalid url is passed
 function clientScrapeStaticInvalid (t, serverType) {
-  var announceUrl = serverType + '://invalid.lol'
+  let announceUrl = serverType + '://invalid.lol'
   if (serverType === 'http') announceUrl += '/announce'
 
-  var client = Client.scrape({
+  const client = Client.scrape({
     announce: announceUrl,
     infoHash: fixtures.leaves.parsedTorrent.infoHash,
     wrtc: {}
@@ -104,17 +96,13 @@ test('http: scrape using Client.scrape static method (invalid url)', function (t
   clientScrapeStaticInvalid(t, 'http')
 })
 
-test('udp: scrape using Client.scrape static method (invalid url)', function (t) {
-  clientScrapeStaticInvalid(t, 'udp')
-})
-
 test('ws: scrape using Client.scrape static method (invalid url)', function (t) {
   clientScrapeStaticInvalid(t, 'ws')
 })
 
 function clientScrapeMulti (t, serverType) {
-  var infoHash1 = fixtures.leaves.parsedTorrent.infoHash
-  var infoHash2 = fixtures.alice.parsedTorrent.infoHash
+  const infoHash1 = fixtures.leaves.parsedTorrent.infoHash
+  const infoHash2 = fixtures.alice.parsedTorrent.infoHash
 
   commonTest.createServer(t, serverType, function (server, announceUrl) {
     Client.scrape({
@@ -146,20 +134,16 @@ test('http: MULTI scrape using Client.scrape static method', function (t) {
   clientScrapeMulti(t, 'http')
 })
 
-test('udp: MULTI scrape using Client.scrape static method', function (t) {
-  clientScrapeMulti(t, 'udp')
-})
-
 test('server: multiple info_hash scrape (manual http request)', function (t) {
   t.plan(13)
 
-  var binaryInfoHash1 = commonLib.hexToBinary(fixtures.leaves.parsedTorrent.infoHash)
-  var binaryInfoHash2 = commonLib.hexToBinary(fixtures.alice.parsedTorrent.infoHash)
+  const binaryInfoHash1 = commonLib.hexToBinary(fixtures.leaves.parsedTorrent.infoHash)
+  const binaryInfoHash2 = commonLib.hexToBinary(fixtures.alice.parsedTorrent.infoHash)
 
   commonTest.createServer(t, 'http', function (server, announceUrl) {
-    var scrapeUrl = announceUrl.replace('/announce', '/scrape')
+    const scrapeUrl = announceUrl.replace('/announce', '/scrape')
 
-    var url = scrapeUrl + '?' + commonLib.querystringStringify({
+    const url = scrapeUrl + '?' + commonLib.querystringStringify({
       info_hash: [binaryInfoHash1, binaryInfoHash2]
     })
 
@@ -190,16 +174,16 @@ test('server: multiple info_hash scrape (manual http request)', function (t) {
 test('server: all info_hash scrape (manual http request)', function (t) {
   t.plan(10)
 
-  var binaryInfoHash = commonLib.hexToBinary(fixtures.leaves.parsedTorrent.infoHash)
+  const binaryInfoHash = commonLib.hexToBinary(fixtures.leaves.parsedTorrent.infoHash)
 
   commonTest.createServer(t, 'http', function (server, announceUrl) {
-    var scrapeUrl = announceUrl.replace('/announce', '/scrape')
+    const scrapeUrl = announceUrl.replace('/announce', '/scrape')
 
     // announce a torrent to the tracker
-    var client = new Client({
+    const client = new Client({
       infoHash: fixtures.leaves.parsedTorrent.infoHash,
       announce: announceUrl,
-      peerId: peerId,
+      peerId,
       port: 6881
     })
     client.on('error', function (err) { t.error(err) })

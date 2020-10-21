@@ -3,12 +3,10 @@ const EventEmitter = require('events')
 const once = require('once')
 const parallel = require('run-parallel')
 const Peer = require('simple-peer')
-const uniq = require('uniq')
 
-const common = require('./lib/common')
-const HTTPTracker = require('./lib/client/http-tracker') // empty object in browser
-const UDPTracker = require('./lib/client/udp-tracker') // empty object in browser
-const WebSocketTracker = require('./lib/client/websocket-tracker')
+const common = require('../lib/common')
+const HTTPTracker = require('./http-tracker') // empty object in browser
+const WebSocketTracker = require('./websocket-tracker')
 
 /**
  * BitTorrent tracker client.
@@ -72,7 +70,8 @@ class Client extends EventEmitter {
       }
       return announceUrl
     })
-    announce = uniq(announce)
+    // remove duplicates by converting to Set and back
+    announce = Array.from(new Set(announce))
 
     const webrtcSupport = this._wrtc !== false && (!!this._wrtc || Peer.WEBRTC_SUPPORT)
 
@@ -102,8 +101,6 @@ class Client extends EventEmitter {
         if ((protocol === 'http:' || protocol === 'https:') &&
             typeof HTTPTracker === 'function') {
           return new HTTPTracker(this, announceUrl)
-        } else if (protocol === 'udp:' && typeof UDPTracker === 'function') {
-          return new UDPTracker(this, announceUrl)
         } else if ((protocol === 'ws:' || protocol === 'wss:') && webrtcSupport) {
           // Skip ws:// trackers on https:// sites because they throw SecurityError
           if (protocol === 'ws:' && typeof window !== 'undefined' &&

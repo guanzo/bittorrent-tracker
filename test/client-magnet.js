@@ -15,7 +15,7 @@ function testMagnet (t, serverType) {
     var client = new Client({
       infoHash: parsedTorrent.infoHash,
       announce: announceUrl,
-      peerId: peerId,
+      peerId,
       port: 6881,
       wrtc: {}
     })
@@ -55,10 +55,6 @@ function testMagnet (t, serverType) {
 
 test('http: magnet: client.start/update/stop()', function (t) {
   testMagnet(t, 'http')
-})
-
-test('udp: magnet: client.start/update/stop()', function (t) {
-  testMagnet(t, 'udp')
 })
 
 test('ws: magnet: client.start/update/stop()', function (t) {

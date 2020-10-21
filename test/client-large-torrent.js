@@ -11,7 +11,7 @@ function testLargeTorrent (t, serverType) {
   common.createServer(t, serverType, function (server, announceUrl) {
     var client = new Client({
       infoHash: fixtures.sintel.parsedTorrent.infoHash,
-      peerId: peerId,
+      peerId,
       port: 6881,
       announce: announceUrl,
       wrtc: {}
@@ -52,10 +52,6 @@ function testLargeTorrent (t, serverType) {
 
 test('http: large torrent: client.start()', function (t) {
   testLargeTorrent(t, 'http')
-})
-
-test('udp: large torrent: client.start()', function (t) {
-  testLargeTorrent(t, 'udp')
 })
 
 test('ws: large torrent: client.start()', function (t) {
